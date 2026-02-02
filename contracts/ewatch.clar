@@ -40,3 +40,17 @@
 (define-read-only (get-events-by-owner (owner principal))
   (ok true)
 )
+
+(define-public (update-event (event-id uint) (new-data (string-ascii 500)))
+  (let
+    (
+      (event (unwrap! (get-event event-id) (err u404)))
+    )
+    (asserts! (is-eq tx-sender (get owner event)) (err u403))
+    (map-set events
+      { event-id: event-id }
+      (merge event { data: new-data })
+    )
+    (ok true)
+  )
+)

@@ -28,3 +28,15 @@
     (ok event-id)
   )
 )
+
+(define-read-only (get-event (event-id uint))
+  (map-get? events { event-id: event-id })
+)
+
+(define-read-only (get-event-count)
+  (ok (var-get event-counter))
+)
+
+(define-read-only (get-events-by-owner (owner principal))
+  (ok true)
+)

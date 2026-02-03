@@ -12,7 +12,7 @@ import { StacksMainnet } from '@stacks/network';
 import { userSession } from '../auth';
 
 const network = new StacksMainnet();
-const contractAddress = 'SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9';
+const contractAddress = 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T';
 const contractName = 'ewatch';
 
 export const registerEvent = async (eventType: string, data: string) => {

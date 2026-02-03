@@ -25,7 +25,7 @@
       {
         owner: tx-sender,
         event-type: event-type,
-        timestamp: block-height,
+        timestamp: stacks-block-height,
         data: data,
         active: true
       }

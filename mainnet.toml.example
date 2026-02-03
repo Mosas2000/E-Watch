@@ -1,0 +1,11 @@
+[network]
+name = "mainnet"
+deployment_fee_rate = 10
+
+[accounts.deployer]
+mnemonic = "your twelve or twenty-four word seed phrase goes here"
+# The deployer account will be derived from this mnemonic
+# Make sure this account has sufficient STX for deployment fees
+
+[contracts]
+ewatch = "contracts/ewatch.clar"

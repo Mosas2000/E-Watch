@@ -5,13 +5,13 @@ import {
   PostConditionMode,
   stringAsciiCV,
   uintCV,
-  callReadOnlyFunction,
+  fetchCallReadOnlyFunction,
   cvToJSON,
 } from '@stacks/transactions';
-import { StacksMainnet } from '@stacks/network';
+import { STACKS_MAINNET } from '@stacks/network';
 import { userSession } from '../auth';
 
-const network = new StacksMainnet();
+const network = STACKS_MAINNET;
 const contractAddress = 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T';
 const contractName = 'ewatch';
 
@@ -30,35 +30,33 @@ export const registerEvent = async (eventType: string, data: string) => {
   };
 
   const transaction = await makeContractCall(txOptions);
-  const broadcastResponse = await broadcastTransaction(transaction, network);
+  const broadcastResponse = await broadcastTransaction({ transaction, network });
   return broadcastResponse;
 };
 
 export const getEvent = async (eventId: number) => {
-  const options = {
+  const result = await fetchCallReadOnlyFunction({
     contractAddress,
     contractName,
     functionName: 'get-event',
     functionArgs: [uintCV(eventId)],
     network,
     senderAddress: contractAddress,
-  };
+  });
 
-  const result = await callReadOnlyFunction(options);
   return cvToJSON(result);
 };
 
 export const getEventCount = async () => {
-  const options = {
+  const result = await fetchCallReadOnlyFunction({
     contractAddress,
     contractName,
     functionName: 'get-event-count',
     functionArgs: [],
     network,
     senderAddress: contractAddress,
-  };
+  });
 
-  const result = await callReadOnlyFunction(options);
   return cvToJSON(result);
 };
 
@@ -77,7 +75,7 @@ export const updateEvent = async (eventId: number, newData: string) => {
   };
 
   const transaction = await makeContractCall(txOptions);
-  return broadcastTransaction(transaction, network);
+  return broadcastTransaction({ transaction, network });
 };
 
 export const deactivateEvent = async (eventId: number) => {
@@ -95,5 +93,5 @@ export const deactivateEvent = async (eventId: number) => {
   };
 
   const transaction = await makeContractCall(txOptions);
-  return broadcastTransaction(transaction, network);
+  return broadcastTransaction({ transaction, network });
 };

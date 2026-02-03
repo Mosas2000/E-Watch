@@ -7,6 +7,7 @@
     "deploy": "ts-node scripts/deploy.ts",
     "transaction": "ts-node scripts/test-transaction.ts",
     "register-events": "ts-node scripts/register-events.ts",
+    "query": "ts-node scripts/query-events.ts",
     "build": "cd frontend && npm run build"
   },
   "keywords": [],

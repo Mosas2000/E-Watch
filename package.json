@@ -5,6 +5,8 @@
   "scripts": {
     "test": "vitest",
     "deploy": "ts-node scripts/deploy.ts",
+    "transaction": "ts-node scripts/test-transaction.ts",
+    "register-events": "ts-node scripts/register-events.ts",
     "build": "cd frontend && npm run build"
   },
   "keywords": [],
@@ -21,6 +23,8 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "@stacks/wallet-sdk": "^7.2.0",
     "dotenv": "^17.2.3"
   }
 }

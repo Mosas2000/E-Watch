@@ -1,40 +1,50 @@
 import { makeContractDeploy, broadcastTransaction, AnchorMode } from '@stacks/transactions';
-import { StacksMainnet } from '@stacks/network';
+import { STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network';
 import { readFileSync } from 'fs';
-import * as dotenv from 'dotenv';
+import * as toml from '@iarna/toml';
+import { generateWallet, getStxAddress } from '@stacks/wallet-sdk';
 
-dotenv.config();
+const configPath = 'settings/mainnet.toml';
+const config: any = toml.parse(readFileSync(configPath, 'utf-8'));
 
-const network = new StacksMainnet();
+const network = config.settings.network === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET;
 const contractCode = readFileSync('contracts/ewatch.clar', 'utf-8');
 
 async function deployContract() {
-  const deployerKey = process.env.DEPLOYER_KEY;
+  const mnemonic = config.settings.mnemonic;
   
-  if (!deployerKey) {
-    console.error('DEPLOYER_KEY not found in environment variables');
+  if (!mnemonic || mnemonic.includes('your twelve')) {
+    console.error('❌ Please add your mnemonic phrase to settings/mainnet.toml');
     process.exit(1);
   }
 
-  console.log('Deploying E-Watch contract to mainnet...');
+  console.log('🚀 Deploying E-Watch contract to', config.settings.network + '...');
+  console.log('📄 Contract:', 'ewatch');
+
+  const wallet = await generateWallet({ secretKey: mnemonic, password: '' });
+  const account = wallet.accounts[0];
+  const address = getStxAddress({ account, network });
+  
+  console.log('📍 Deployer address:', address);
 
   const txOptions = {
     contractName: 'ewatch',
     codeBody: contractCode,
-    senderKey: deployerKey,
+    senderKey: account.stxPrivateKey,
     network,
     anchorMode: AnchorMode.Any,
   };
 
   try {
     const transaction = await makeContractDeploy(txOptions);
-    const broadcastResponse = await broadcastTransaction(transaction, network);
+    const broadcastResponse = await broadcastTransaction({ transaction, network });
     
-    console.log('Contract deployed successfully');
-    console.log('Transaction ID:', broadcastResponse.txid);
-    console.log('Check status at: https://explorer.hiro.so/txid/' + broadcastResponse.txid);
-  } catch (error) {
-    console.error('Deployment failed:', error);
+    console.log('✅ Contract deployed successfully!');
+    console.log('📝 Transaction ID:', broadcastResponse.txid);
+    console.log('🔍 Explorer:', `https://explorer.hiro.so/txid/${broadcastResponse.txid}?chain=${config.settings.network}`);
+  } catch (error: any) {
+    console.error('❌ Deployment failed:', error.message || error);
+    if (error.reason) console.error('Reason:', error.reason);
     process.exit(1);
   }
 }

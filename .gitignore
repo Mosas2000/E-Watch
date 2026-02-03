@@ -1,7 +1,7 @@
 node_modules
 .env
-mainnet.toml
-testnet.toml
+settings/mainnet.toml
+settings/testnet.toml
 dist
 build
 .DS_Store

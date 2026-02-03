@@ -1,0 +1,12 @@
+[network]
+name = "testnet"
+deployment_fee_rate = 10
+
+[accounts.deployer]
+mnemonic = "your twelve or twenty-four word seed phrase goes here"
+# The deployer account will be derived from this mnemonic
+# Make sure this account has sufficient testnet STX for deployment fees
+# Get testnet STX from: https://explorer.hiro.so/sandbox/faucet
+
+[contracts]
+ewatch = "contracts/ewatch.clar"

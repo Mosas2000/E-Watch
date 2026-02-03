@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "deploy": "ts-node scripts/deploy.ts",
+    "build": "cd frontend && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +16,11 @@
     "@stacks/cli": "^7.2.0",
     "@stacks/network": "^7.3.1",
     "@stacks/transactions": "^7.3.1",
+    "@types/node": "^25.2.0",
+    "ts-node": "^10.9.2",
     "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
   }
 }

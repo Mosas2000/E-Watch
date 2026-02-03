@@ -49,9 +49,12 @@ async function queryEvents() {
 
         const eventData = cvToJSON(eventResult);
         
-        if (eventData.value) {
-          const event = eventData.value;
-          console.log(`\n🔖 Event ID: ${i}`);
+        // Debug: log the raw response
+        console.log(`\n🔖 Event ID: ${i}`);
+        
+        // Handle optional response: check if it's (some {...})
+        if (eventData.type === 'optional' && eventData.value) {
+          const event = eventData.value.value;
           console.log(`   👤 Owner: ${event.owner.value}`);
           console.log(`   🏷️  Type: ${event['event-type'].value}`);
           console.log(`   📦 Data: ${event.data.value}`);

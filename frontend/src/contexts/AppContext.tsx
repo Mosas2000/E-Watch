@@ -21,10 +21,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    if (userSession.isUserSignedIn()) {
-      const userData = userSession.loadUserData();
-      setUserAddress(userData.profile.stxAddress.mainnet);
-      setIsAuthenticated(true);
+    try {
+      if (userSession.isUserSignedIn()) {
+        const userData = userSession.loadUserData();
+        setUserAddress(userData?.profile?.stxAddress?.mainnet || '');
+        setIsAuthenticated(true);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
     }
   }, []);
 

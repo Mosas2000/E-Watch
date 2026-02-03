@@ -23,9 +23,10 @@ export const EventDashboard = () => {
   const loadEventCount = async () => {
     try {
       const count = await getEventCount();
-      setTotalEvents(count.value);
+      setTotalEvents(count.value?.value || 0);
     } catch (error) {
       console.error('Failed to load event count:', error);
+      setTotalEvents(0);
     }
   };
 
@@ -35,8 +36,15 @@ export const EventDashboard = () => {
     setLoading(true);
     try {
       const result = await getEvent(Number(searchId));
-      if (result.value) {
-        setEvents([result.value]);
+      if (result?.value) {
+        const event = result.value;
+        setEvents([{
+          owner: event.owner?.value || '',
+          eventType: event['event-type']?.value || '',
+          timestamp: event.timestamp?.value || 0,
+          data: event.data?.value || '',
+          active: event.active?.value || false
+        }]);
       } else {
         setEvents([]);
         alert('Event not found');

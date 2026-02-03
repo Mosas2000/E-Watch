@@ -9,12 +9,18 @@ export const WalletConnect = () => {
   const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
-    if (userSession.isSignInPending()) {
-      userSession.handlePendingSignIn().then((userData) => {
-        setUserData(userData);
-      });
-    } else if (userSession.isUserSignedIn()) {
-      setUserData(userSession.loadUserData());
+    try {
+      if (userSession.isSignInPending()) {
+        userSession.handlePendingSignIn().then((userData) => {
+          setUserData(userData);
+        }).catch((error) => {
+          console.error('Sign in error:', error);
+        });
+      } else if (userSession.isUserSignedIn()) {
+        setUserData(userSession.loadUserData());
+      }
+    } catch (error) {
+      console.error('Wallet connection error:', error);
     }
   }, []);
 
@@ -41,7 +47,7 @@ export const WalletConnect = () => {
     <div className="wallet-connect">
       {userData ? (
         <div>
-          <p>Connected: {userData.profile.stxAddress.mainnet}</p>
+          <p>Connected: {userData?.profile?.stxAddress?.mainnet || 'Unknown'}</p>
           <button onClick={disconnectWallet}>Disconnect</button>
         </div>
       ) : (

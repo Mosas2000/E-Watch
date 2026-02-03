@@ -58,10 +58,23 @@ npm run build
 
 ## Mainnet Contract Details
 
-After deployment, your contract will be at:
-- Address: [Your Deployer Address]
+✅ **Deployed Successfully!**
+- Address: SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T
 - Contract Name: ewatch
-- Explorer: https://explorer.hiro.so/
+- Full Contract ID: SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T.ewatch
+- Explorer: https://explorer.hiro.so/txid/08b7510ae768dc595ce769d628ae44c4da8cfa56f274f5b38028a8ba6238cc78?chain=mainnet
+
+## On-Chain Transactions
+
+Register a single event:
+```bash
+npm run transaction
+```
+
+Register multiple events:
+```bash
+npm run register-events
+```
 
 ## Support
 

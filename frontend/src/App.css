@@ -219,3 +219,14 @@ input:focus, textarea:focus, select:focus {
   color: #666;
   font-size: 14px;
 }
+
+.warning {
+  padding: 15px;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  margin: 15px 0;
+  text-align: center;
+  font-weight: 500;
+}

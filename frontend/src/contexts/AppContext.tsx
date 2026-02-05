@@ -22,7 +22,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try {
-      if (userSession.isUserSignedIn()) {
+      if (userSession.isSignInPending()) {
+        userSession.handlePendingSignIn().then((userData) => {
+          setUserAddress(userData?.profile?.stxAddress?.mainnet || '');
+          setIsAuthenticated(true);
+        });
+      } else if (userSession.isUserSignedIn()) {
         const userData = userSession.loadUserData();
         setUserAddress(userData?.profile?.stxAddress?.mainnet || '');
         setIsAuthenticated(true);

@@ -9,29 +9,30 @@ import {
   cvToJSON,
 } from '@stacks/transactions';
 import { STACKS_MAINNET } from '@stacks/network';
-import { userSession } from '../auth';
+import { openContractCall } from '@stacks/connect';
 
 const network = STACKS_MAINNET;
 const contractAddress = 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T';
 const contractName = 'ewatch';
 
 export const registerEvent = async (eventType: string, data: string) => {
-  const userData = userSession.loadUserData();
-  
-  const txOptions = {
-    contractAddress,
-    contractName,
-    functionName: 'register-event',
-    functionArgs: [stringAsciiCV(eventType), stringAsciiCV(data)],
-    senderKey: userData.appPrivateKey,
-    network,
-    anchorMode: AnchorMode.Any,
-    postConditionMode: PostConditionMode.Allow,
-  };
-
-  const transaction = await makeContractCall(txOptions);
-  const broadcastResponse = await broadcastTransaction({ transaction, network });
-  return broadcastResponse;
+  return new Promise((resolve, reject) => {
+    openContractCall({
+      contractAddress,
+      contractName,
+      functionName: 'register-event',
+      functionArgs: [stringAsciiCV(eventType), stringAsciiCV(data)],
+      network,
+      anchorMode: AnchorMode.Any,
+      postConditionMode: PostConditionMode.Allow,
+      onFinish: (data) => {
+        resolve(data);
+      },
+      onCancel: () => {
+        reject(new Error('Transaction cancelled by user'));
+      },
+    });
+  });
 };
 
 export const getEvent = async (eventId: number) => {

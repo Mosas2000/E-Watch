@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { registerEvent } from '../services/contractService';
+import { useApp } from '../contexts/AppContext';
 
 export const EventRegistration = () => {
+  const { isAuthenticated, userAddress } = useApp();
   const [eventType, setEventType] = useState('');
   const [data, setData] = useState('');
   const [loading, setLoading] = useState(false);
@@ -49,6 +51,15 @@ export const EventRegistration = () => {
       setLoading(false);
     }
   };
+
+  if (!isAuthenticated || !userAddress) {
+    return (
+      <div className="event-registration">
+        <h2>Register New Event</h2>
+        <p className="warning">Please connect your wallet to register events.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="event-registration">

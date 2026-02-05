@@ -1,11 +1,9 @@
 import { showConnect } from '@stacks/connect';
-import { AppConfig, UserSession } from '@stacks/connect';
 import { useState, useEffect } from 'react';
-
-const appConfig = new AppConfig(['store_write', 'publish_data']);
-const userSession = new UserSession({ appConfig });
+import { useApp } from '../contexts/AppContext';
 
 export const WalletConnect = () => {
+  const { userSession, isAuthenticated, userAddress, setUserAddress } = useApp();
   const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
@@ -13,16 +11,19 @@ export const WalletConnect = () => {
       if (userSession.isSignInPending()) {
         userSession.handlePendingSignIn().then((userData) => {
           setUserData(userData);
+          setUserAddress(userData?.profile?.stxAddress?.mainnet || '');
         }).catch((error) => {
           console.error('Sign in error:', error);
         });
       } else if (userSession.isUserSignedIn()) {
-        setUserData(userSession.loadUserData());
+        const data = userSession.loadUserData();
+        setUserData(data);
+        setUserAddress(data?.profile?.stxAddress?.mainnet || '');
       }
     } catch (error) {
       console.error('Wallet connection error:', error);
     }
-  }, []);
+  }, [userSession, setUserAddress]);
 
   const connectWallet = () => {
     showConnect({
@@ -45,9 +46,9 @@ export const WalletConnect = () => {
 
   return (
     <div className="wallet-connect">
-      {userData ? (
+      {isAuthenticated && userAddress ? (
         <div>
-          <p>Connected: {userData?.profile?.stxAddress?.mainnet || 'Unknown'}</p>
+          <p>Connected: {userAddress}</p>
           <button onClick={disconnectWallet}>Disconnect</button>
         </div>
       ) : (

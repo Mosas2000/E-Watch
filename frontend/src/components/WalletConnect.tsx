@@ -1,6 +1,8 @@
-import { showConnect } from '@stacks/connect';
+import * as stacksConnect from '@stacks/connect';
 import { useState, useEffect } from 'react';
 import { useApp } from '../contexts/AppContext';
+
+const { AppConfig, showConnect, UserSession } = stacksConnect;
 
 export const WalletConnect = () => {
   const { userSession, isAuthenticated, userAddress, setUserAddress } = useApp();
@@ -26,14 +28,26 @@ export const WalletConnect = () => {
   }, [userSession, setUserAddress]);
 
   const connectWallet = () => {
+    if (typeof showConnect !== 'function') {
+      console.error('showConnect is not available:', typeof showConnect);
+      console.log('Available exports:', Object.keys(stacksConnect));
+      return;
+    }
+
+    const appDetails = {
+      name: 'E-Watch',
+      icon: window.location.origin + '/logo.png',
+    };
+
     showConnect({
-      appDetails: {
-        name: 'E-Watch',
-        icon: window.location.origin + '/logo.png',
-      },
-      redirectTo: '/',
+      appDetails,
       onFinish: () => {
-        window.location.reload();
+        const userData = userSession.loadUserData();
+        setUserData(userData);
+        setUserAddress(userData?.profile?.stxAddress?.mainnet || '');
+      },
+      onCancel: () => {
+        console.log('User cancelled connection');
       },
       userSession,
     });

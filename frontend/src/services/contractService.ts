@@ -49,29 +49,64 @@ export const registerEvent = async (eventType: string, data: string) => {
 };
 
 export const getEvent = async (eventId: number) => {
-  const result = await fetchCallReadOnlyFunction({
+  logger.debug('Fetching event from contract', {
+    eventId,
     contractAddress,
-    contractName,
-    functionName: 'get-event',
-    functionArgs: [uintCV(eventId)],
-    network,
-    senderAddress: contractAddress,
   });
 
-  return cvToJSON(result);
+  try {
+    const result = await fetchCallReadOnlyFunction({
+      contractAddress,
+      contractName,
+      functionName: 'get-event',
+      functionArgs: [uintCV(eventId)],
+      network,
+      senderAddress: contractAddress,
+    });
+
+    const data = cvToJSON(result);
+    logger.info('Event retrieved successfully', {
+      eventId,
+      found: !!data.value,
+    });
+    
+    return data;
+  } catch (error: any) {
+    logger.error('Failed to fetch event', {
+      eventId,
+      error: error.message,
+    });
+    throw error;
+  }
 };
 
 export const getEventCount = async () => {
-  const result = await fetchCallReadOnlyFunction({
+  logger.debug('Fetching event count from contract', {
     contractAddress,
-    contractName,
-    functionName: 'get-event-count',
-    functionArgs: [],
-    network,
-    senderAddress: contractAddress,
   });
 
-  return cvToJSON(result);
+  try {
+    const result = await fetchCallReadOnlyFunction({
+      contractAddress,
+      contractName,
+      functionName: 'get-event-count',
+      functionArgs: [],
+      network,
+      senderAddress: contractAddress,
+    });
+
+    const data = cvToJSON(result);
+    logger.info('Event count retrieved', {
+      count: data.value?.value,
+    });
+    
+    return data;
+  } catch (error: any) {
+    logger.error('Failed to fetch event count', {
+      error: error.message,
+    });
+    throw error;
+  }
 };
 
 export const updateEvent = async (eventId: number, newData: string) => {

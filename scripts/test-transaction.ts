@@ -106,14 +106,24 @@ async function registerEvent() {
     console.log('\n⏳ Creating transaction...');
     const transaction = await makeContractCall(txOptions);
     
+    logger.info('Broadcasting transaction to network', context);
     console.log('⏳ Broadcasting transaction...');
     const broadcastResponse = await broadcastTransaction({ transaction, network });
     
+    logger.info('Event registered successfully', {
+      ...context,
+      txid: maskTxId(broadcastResponse.txid),
+      eventType,
+    });
     console.log('\n✅ Event registered successfully!');
     console.log('📝 Transaction ID:', broadcastResponse.txid);
     console.log('🔍 Explorer:', `https://explorer.hiro.so/txid/${broadcastResponse.txid}?chain=mainnet`);
     console.log('\n⏰ Wait for transaction to confirm (usually 10-30 minutes)');
   } catch (error: any) {
+    logger.error('Transaction failed', {
+      ...context,
+      error: sanitizeError(error),
+    });
     console.error('\n❌ Transaction failed:', error.message || error);
     if (error.reason) console.error('Reason:', error.reason);
     if (error.error) console.error('Error:', error.error);

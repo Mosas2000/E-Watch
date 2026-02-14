@@ -48,12 +48,21 @@ async function queryEvents() {
     }
 
     // Fetch each event
+    logger.debug('Fetching individual events', {
+      ...context,
+      count: totalEvents,
+    });
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('📋 Fetching all events...');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     for (let i = 0; i < totalEvents; i++) {
       try {
+        logger.debug(`Fetching event ${i}`, {
+          ...context,
+          eventId: i,
+        });
+
         const eventResult = await fetchCallReadOnlyFunction({
           contractAddress,
           contractName,
@@ -71,24 +80,48 @@ async function queryEvents() {
         // Handle optional response: check if it's (some {...})
         if (eventData.type === 'optional' && eventData.value) {
           const event = eventData.value.value;
+          logger.info(`Event ${i} retrieved`, {
+            ...context,
+            eventId: i,
+            owner: maskAddress(event.owner.value),
+            eventType: event['event-type'].value,
+            active: event.active.value,
+          });
           console.log(`   👤 Owner: ${event.owner.value}`);
           console.log(`   🏷️  Type: ${event['event-type'].value}`);
           console.log(`   📦 Data: ${event.data.value}`);
           console.log(`   ⏰ Block Height: ${event.timestamp.value}`);
           console.log(`   ✅ Active: ${event.active.value}`);
         } else {
+          logger.warn(`Event ${i} not found`, {
+            ...context,
+            eventId: i,
+          });
           console.log(`\n❌ Event ${i}: Not found`);
         }
       } catch (error: any) {
+        logger.error(`Failed to fetch event ${i}`, {
+          ...context,
+          eventId: i,
+          error: error.message,
+        });
         console.error(`\n❌ Error fetching event ${i}:`, error.message);
       }
     }
 
+    logger.info('Query completed successfully', {
+      ...context,
+      eventsQueried: totalEvents,
+    });
     console.log('\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('✅ Query completed!');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   } catch (error: any) {
+    logger.error('Query operation failed', {
+      ...context,
+      error: error.message,
+    });
     console.error('\n❌ Query failed:', error.message || error);
     process.exit(1);
   }

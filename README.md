@@ -22,6 +22,44 @@ npm install
 npm run test
 npm run deploy
 
+## Testing
+
+### Unit Tests
+Run Vitest unit tests for smart contract logic:
+```bash
+npm run test
+```
+
+### End-to-End Tests
+E-Watch includes comprehensive E2E tests using Playwright to verify the entire application flow across multiple browsers.
+
+**Run all E2E tests (headless mode):**
+```bash
+npm run test:e2e
+```
+
+**Run tests with interactive UI:**
+```bash
+npm run test:e2e:ui
+```
+
+**Run tests in headed mode (see browser):**
+```bash
+npm run test:e2e:headed
+```
+
+**Debug tests step-by-step:**
+```bash
+npm run test:e2e:debug
+```
+
+**View test report:**
+```bash
+npm run test:e2e:report
+```
+
+For detailed information about E2E test structure, fixtures, and best practices, see [e2e/README.md](e2e/README.md).
+
 ## Features
 - Event registration on-chain
 - Query events by ID

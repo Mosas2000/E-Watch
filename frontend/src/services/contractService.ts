@@ -10,12 +10,18 @@ import {
 } from '@stacks/transactions';
 import { STACKS_MAINNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
+import logger from '../utils/logger';
 
 const network = STACKS_MAINNET;
 const contractAddress = 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T';
 const contractName = 'ewatch';
 
 export const registerEvent = async (eventType: string, data: string) => {
+  logger.info('Initiating event registration', {
+    eventType,
+    dataLength: data.length,
+  });
+
   return new Promise((resolve, reject) => {
     openContractCall({
       contractAddress,
@@ -26,9 +32,16 @@ export const registerEvent = async (eventType: string, data: string) => {
       anchorMode: AnchorMode.Any,
       postConditionMode: PostConditionMode.Allow,
       onFinish: (data) => {
+        logger.transaction('Event registration completed', {
+          eventType,
+          txid: data.txId,
+        });
         resolve(data);
       },
       onCancel: () => {
+        logger.warn('Event registration cancelled by user', {
+          eventType,
+        });
         reject(new Error('Transaction cancelled by user'));
       },
     });

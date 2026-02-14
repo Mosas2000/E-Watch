@@ -1,0 +1,31 @@
+# E-Watch Robots.txt
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://ewatch.io/sitemap.xml
+
+# Crawl-delay for specific bots (optional)
+User-agent: Googlebot
+Crawl-delay: 0
+
+User-agent: Bingbot
+Crawl-delay: 1
+
+# Block access to certain paths if needed (currently none)
+# Disallow: /admin/
+# Disallow: /private/
+
+# Allow indexing of CSS and JS files for proper rendering
+User-agent: Googlebot
+Allow: /*.css$
+Allow: /*.js$
+
+# Block bad bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10

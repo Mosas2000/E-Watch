@@ -54,19 +54,24 @@ export const EventRegistration = () => {
 
   if (!isAuthenticated || !userAddress) {
     return (
-      <div className="event-registration">
-        <h2>Register New Event</h2>
-        <p className="warning">Please connect your wallet to register events.</p>
-      </div>
+      <section className="event-registration" aria-labelledby="registration-heading">
+        <h2 id="registration-heading">Register New Event</h2>
+        <p className="warning" role="alert">Please connect your wallet to register events.</p>
+      </section>
     );
   }
 
   return (
-    <div className="event-registration">
-      <h2>Register New Event</h2>
-      <form onSubmit={handleSubmit}>
+    <section className="event-registration" aria-labelledby="registration-heading">
+      <h2 id="registration-heading">Register New Blockchain Event</h2>
+      <p className="section-description">
+        Submit new events to the Stacks blockchain for permanent, immutable storage and tracking.
+      </p>
+      <form onSubmit={handleSubmit} aria-label="Event registration form">
         <div className="form-group">
-          <label htmlFor="eventType">Event Type</label>
+          <label htmlFor="eventType">
+            Event Type <span className="required" aria-label="required">*</span>
+          </label>
           <input
             id="eventType"
             type="text"
@@ -75,12 +80,19 @@ export const EventRegistration = () => {
             onChange={(e) => setEventType(e.target.value)}
             maxLength={50}
             disabled={loading}
+            aria-required="true"
+            aria-invalid={error.includes('Event type') ? 'true' : 'false'}
+            aria-describedby="eventType-help"
           />
-          <small>{eventType.length}/50 characters</small>
+          <small id="eventType-help" className="help-text">
+            {eventType.length}/50 characters - Brief identifier for your event
+          </small>
         </div>
 
         <div className="form-group">
-          <label htmlFor="data">Event Data</label>
+          <label htmlFor="data">
+            Event Data <span className="required" aria-label="required">*</span>
+          </label>
           <textarea
             id="data"
             placeholder="Enter event data in JSON or text format"
@@ -89,17 +101,34 @@ export const EventRegistration = () => {
             maxLength={500}
             rows={6}
             disabled={loading}
+            aria-required="true"
+            aria-invalid={error.includes('Event data') ? 'true' : 'false'}
+            aria-describedby="data-help"
           />
-          <small>{data.length}/500 characters</small>
+          <small id="data-help" className="help-text">
+            {data.length}/500 characters - Detailed information about the event
+          </small>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">{success}</div>}
+        {error && (
+          <div className="error-message" role="alert" aria-live="polite">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="success-message" role="status" aria-live="polite">
+            {success}
+          </div>
+        )}
 
-        <button type="submit" disabled={loading}>
+        <button 
+          type="submit" 
+          disabled={loading}
+          aria-busy={loading ? 'true' : 'false'}
+        >
           {loading ? 'Registering...' : 'Register Event'}
         </button>
       </form>
-    </div>
+    </section>
   );
 };

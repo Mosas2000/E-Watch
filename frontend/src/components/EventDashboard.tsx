@@ -67,31 +67,52 @@ export const EventDashboard = () => {
   const filteredEvents = filterEvents(events);
 
   return (
-    <div className="event-dashboard">
-      <h2>Event Dashboard</h2>
+    <section className="event-dashboard" aria-labelledby="dashboard-heading">
+      <h2 id="dashboard-heading">Event Dashboard</h2>
+      <p className="section-description">
+        Browse and search blockchain events stored on the Stacks network. View event details, status, and transaction history.
+      </p>
       
-      <div className="dashboard-stats">
-        <p>Total Events: {totalEvents}</p>
+      <div className="dashboard-stats" role="region" aria-label="Dashboard statistics">
+        <p>
+          <strong>Total Events:</strong> 
+          <span className="stat-value" aria-label={`${totalEvents} total events`}>{totalEvents}</span>
+        </p>
       </div>
 
-      <div className="search-section">
+      <div className="search-section" role="search" aria-label="Event search">
+        <h3 className="sr-only">Search Events</h3>
+        <label htmlFor="event-search" className="sr-only">
+          Enter Event ID to search
+        </label>
         <input
+          id="event-search"
           type="number"
           placeholder="Enter Event ID"
           value={searchId}
           onChange={(e) => setSearchId(e.target.value)}
           min="0"
+          aria-describedby="search-help"
         />
-        <button onClick={fetchEvent} disabled={loading}>
+        <small id="search-help" className="sr-only">
+          Enter a numeric event ID to retrieve specific event details
+        </small>
+        <button 
+          onClick={fetchEvent} 
+          disabled={loading}
+          aria-busy={loading ? 'true' : 'false'}
+        >
           {loading ? 'Searching...' : 'Search'}
         </button>
       </div>
 
-      <div className="filter-section">
-        <label>Filter by status:</label>
+      <div className="filter-section" role="region" aria-label="Event filters">
+        <label htmlFor="status-filter">Filter by status:</label>
         <select 
+          id="status-filter"
           value={activeFilter} 
           onChange={(e) => setActiveFilter(e.target.value as any)}
+          aria-label="Filter events by status"
         >
           <option value="all">All Events</option>
           <option value="active">Active Only</option>
@@ -99,27 +120,47 @@ export const EventDashboard = () => {
         </select>
       </div>
 
-      <div className="events-list">
+      <div className="events-list" role="region" aria-label="Event results">
+        <h3 className="sr-only">Event Results</h3>
         {filteredEvents.length === 0 ? (
-          <p>No events to display</p>
+          <p className="no-results" role="status">
+            No events to display. Try searching for an event ID or adjust your filters.
+          </p>
         ) : (
-          filteredEvents.map((event, index) => (
-            <div key={index} className="event-card">
-              <div className="event-header">
-                <span className="event-type">{event.eventType}</span>
-                <span className={`event-status ${event.active ? 'active' : 'inactive'}`}>
-                  {event.active ? 'Active' : 'Inactive'}
-                </span>
-              </div>
-              <div className="event-details">
-                <p><strong>Owner:</strong> {event.owner}</p>
-                <p><strong>Timestamp:</strong> {event.timestamp}</p>
-                <p><strong>Data:</strong> {event.data}</p>
-              </div>
-            </div>
-          ))
+          <ul className="events-container" role="list">
+            {filteredEvents.map((event, index) => (
+              <li key={index} className="event-card" role="article">
+                <div className="event-header">
+                  <h4 className="event-type" aria-label={`Event type: ${event.eventType}`}>
+                    {event.eventType}
+                  </h4>
+                  <span 
+                    className={`event-status ${event.active ? 'active' : 'inactive'}`}
+                    role="status"
+                    aria-label={`Status: ${event.active ? 'Active' : 'Inactive'}`}
+                  >
+                    {event.active ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                <dl className="event-details">
+                  <dt>Owner:</dt>
+                  <dd>{event.owner}</dd>
+                  
+                  <dt>Timestamp:</dt>
+                  <dd>
+                    <time dateTime={new Date(event.timestamp * 1000).toISOString()}>
+                      {new Date(event.timestamp * 1000).toLocaleString()}
+                    </time>
+                  </dd>
+                  
+                  <dt>Data:</dt>
+                  <dd className="event-data">{event.data}</dd>
+                </dl>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
-    </div>
+    </section>
   );
 };

@@ -1,16 +1,27 @@
 import { fetchCallReadOnlyFunction, cvToJSON, uintCV } from '@stacks/transactions';
 import { STACKS_MAINNET } from '@stacks/network';
+import logger from '../utils/logger';
+import { createLogContext } from '../utils/requestId';
+import { maskAddress } from '../utils/sanitizer';
 
 const network = STACKS_MAINNET;
 const contractAddress = 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T';
 const contractName = 'ewatch';
 
 async function queryEvents() {
+  const context = createLogContext(undefined, {
+    operation: 'queryEvents',
+    contractAddress: maskAddress(contractAddress),
+    contractName,
+  });
+
+  logger.info('Starting event query operation', context);
   console.log('🔍 Querying E-Watch contract events...');
   console.log('📄 Contract:', `${contractAddress}.${contractName}\n`);
 
   try {
     // Get total event count
+    logger.debug('Fetching event count', context);
     console.log('⏳ Fetching event count...');
     const countResult = await fetchCallReadOnlyFunction({
       contractAddress,
@@ -24,9 +35,14 @@ async function queryEvents() {
     const countData = cvToJSON(countResult);
     const totalEvents = countData.value.value;
     
+    logger.info('Event count retrieved', {
+      ...context,
+      totalEvents,
+    });
     console.log(`📊 Total Events Registered: ${totalEvents}\n`);
 
     if (totalEvents === 0) {
+      logger.info('No events found in contract', context);
       console.log('ℹ️  No events found yet.');
       return;
     }

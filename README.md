@@ -16,11 +16,38 @@ Blockchain event monitoring system for Stacks network.
 - Clarity smart contracts
 - React TypeScript frontend
 - Stacks blockchain integration
+- Winston structured logging with rotation
+- Comprehensive E2E testing with Playwright
 
 ## Setup
 npm install
 npm run test
 npm run deploy
+
+## Logging
+
+E-Watch uses structured logging with Winston for backend/scripts and a custom logger for frontend. Logs include:
+- Multiple log levels (error, warn, info, debug)
+- Automatic log rotation with retention policies
+- Sensitive data sanitization
+- Request ID tracking for correlation
+- JSON format for production monitoring
+
+For complete logging documentation, see [LOGGING.md](LOGGING.md).
+
+### Log Configuration
+
+Set the log level via environment variable:
+```bash
+export LOG_LEVEL=debug  # Development
+export LOG_LEVEL=info   # Production
+```
+
+View logs:
+```bash
+tail -f logs/application-$(date +%Y-%m-%d).log
+tail -f logs/error-$(date +%Y-%m-%d).log
+```
 
 ## Testing
 

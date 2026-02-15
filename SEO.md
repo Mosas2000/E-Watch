@@ -2,334 +2,244 @@
 
 ## Overview
 
-This document details the comprehensive SEO (Search Engine Optimization) implementation for the E-Watch blockchain event monitoring platform. The optimizations ensure better discoverability, improved search rankings, and enhanced user experience across search engines and social media platforms.
+This document details the comprehensive SEO (Search Engine Optimization) implementation for the E-Watch blockchain event monitoring platform. The optimizations cover technical SEO, structured data, accessibility, and performance to maximize discoverability, improve search rankings, and ensure an inclusive user experience.
 
-## Implementation Date
+## Last Updated
 
-Implemented: January 2025
+2026-02-15
 
-## Core SEO Components
+---
 
-### 1. robots.txt
+## Architecture
 
-**Location:** `/frontend/public/robots.txt`
-
-**Purpose:** Controls search engine crawler access and behavior.
-
-**Key Features:**
-- Allows all major search engines (Googlebot, Bingbot, etc.)
-- Sets appropriate crawl delays to prevent server overload
-- References sitemap.xml for efficient crawling
-- Blocks aggressive crawlers and AI bots when necessary
-
-**Configuration:**
 ```
-User-agent: *
-Allow: /
-Sitemap: https://ewatch.io/sitemap.xml
-Crawl-delay: 1
+frontend/
+├── public/
+│   ├── robots.txt            # Crawler access rules
+│   ├── sitemap.xml           # URL index for search engines
+│   ├── site.webmanifest      # PWA & mobile SEO metadata
+│   ├── opensearch.xml        # Browser search-bar integration
+│   └── humans.txt            # Team & tech-stack attribution
+├── index.html                # Static meta tags, resource hints, noscript
+└── src/
+    ├── config/
+    │   └── seo.config.ts     # Centralized SEO constants
+    ├── hooks/
+    │   └── usePageSEO.ts     # React hook for dynamic meta management
+    └── components/
+        ├── SEO.tsx            # Legacy imperative meta component
+        ├── SEOFooter.tsx      # Internal-link-rich footer
+        ├── SEOImage.tsx       # Image wrapper enforcing alt text
+        ├── SkipToContent.tsx  # Keyboard bypass block (WCAG 2.4.1)
+        └── StructuredData.tsx # JSON-LD schema.org components
 ```
 
-### 2. sitemap.xml
+---
 
-**Location:** `/frontend/public/sitemap.xml`
+## 1. Crawl & Indexing Layer
 
-**Purpose:** Provides structured map of all website pages for search engines.
+### robots.txt
 
-**Key Features:**
-- XML 0.9 protocol compliant
-- Priority-based URL importance (0.5 to 1.0)
-- Change frequency indicators (daily, weekly, monthly)
-- Last modification timestamps
-- All major pages indexed
+| Directive | Purpose |
+|-----------|---------|
+| `Allow: /` for major engines | Ensures Google, Bing, DuckDuckGo, Yandex, Baidu can index all pages |
+| Per-engine crawl-delay | Prevents overloading: Googlebot 0 s, Bingbot 2 s, Yandex 5 s |
+| `Disallow: /` for AI scrapers | Blocks GPTBot, CCBot, anthropic-ai, Google-Extended |
+| Path restrictions | Blocks `/api/internal/`, `/admin/`, `/_debug/`, `*.json` |
 
-**URLs Included:**
-- Home page (Priority: 1.0, Daily updates)
-- Dashboard (Priority: 0.9, Daily updates)
-- Event Registration (Priority: 0.8, Weekly updates)
-- Documentation (Priority: 0.7, Weekly updates)
-- API Reference (Priority: 0.6, Monthly updates)
-- About Page (Priority: 0.5, Monthly updates)
+### sitemap.xml
 
-### 3. Meta Tags
+12 URLs with priority weighting:
 
-**Location:** `/frontend/index.html`
+| URL | Priority | Frequency |
+|-----|----------|-----------|
+| `/` | 1.0 | daily |
+| `/dashboard` | 0.9 | daily |
+| `/register` | 0.8 | weekly |
+| `/explorer` | 0.8 | daily |
+| `/getting-started` | 0.7 | monthly |
+| `/docs` | 0.7 | weekly |
+| `/docs/api` | 0.6 | monthly |
+| `/docs/smart-contracts` | 0.6 | monthly |
+| `/faq` | 0.5 | monthly |
+| `/about` | 0.5 | monthly |
+| `/privacy` | 0.3 | yearly |
+| `/terms` | 0.3 | yearly |
 
-**Purpose:** Provides metadata for search engines and social media platforms.
+---
 
-#### Primary Meta Tags
+## 2. Meta Tags & Head Configuration
+
+### Static tags in `index.html`
+
+- **Title:** 56 chars — `E-Watch - Blockchain Event Monitoring for Stacks Network`
+- **Description:** 156 chars — includes primary keywords
+- **Keywords:** 9 terms covering blockchain, stacks, web3, dapp
+- **Canonical URL:** `https://ewatch.io/`
+- **Robots:** `index, follow`
+- **Open Graph:** type, url, title, description, image (1200×630), locale
+- **Twitter Card:** `summary_large_image` with dedicated image
+- **Schema.org JSON-LD:** WebApplication with free pricing, FinanceApplication category
+
+### Dynamic tags via `usePageSEO` hook
+
+The hook runs in any component and:
+1. Sets `document.title`
+2. Upserts `<meta>` tags (description, keywords, robots, OG, Twitter)
+3. Updates `<link rel="canonical">`
+4. **Cleans up on unmount** — removes any elements it created
+
+```tsx
+usePageSEO({
+  title: PAGE_META.dashboard.title,
+  description: PAGE_META.dashboard.description,
+  keywords: PAGE_META.dashboard.keywords,
+  canonical: PAGE_META.dashboard.canonical,
+});
+```
+
+### Resource Hints
 
 ```html
-<title>E-Watch - Blockchain Event Monitoring on Stacks</title>
-<meta name="description" content="Monitor, register, and track blockchain events on the Stacks network with E-Watch. Real-time event dashboard, smart contract integration, and comprehensive event management.">
-<meta name="keywords" content="blockchain, stacks, event monitoring, smart contracts, web3, clarity, blockchain events, decentralized">
+<link rel="preconnect" href="https://stacks-node-api.mainnet.stacks.co" />
+<link rel="dns-prefetch" href="https://stacks-node-api.mainnet.stacks.co" />
 ```
 
-#### Open Graph Tags (Facebook, LinkedIn)
+### PWA Manifest (`site.webmanifest`)
 
-```html
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://ewatch.io/">
-<meta property="og:title" content="E-Watch - Blockchain Event Monitoring">
-<meta property="og:description" content="Professional blockchain event monitoring and management on Stacks network">
-<meta property="og:image" content="https://ewatch.io/og-image.png">
-```
+- Standalone display mode for "Add to Home Screen"
+- Icons at 16, 32, 192, 512 px
+- Shortcuts: Dashboard, Register Event
+- Categories: finance, utilities, developer tools
 
-#### Twitter Card Tags
+### OpenSearch (`opensearch.xml`)
 
-```html
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="E-Watch - Blockchain Event Monitoring">
-<meta name="twitter:description" content="Monitor and manage blockchain events on Stacks">
-<meta name="twitter:image" content="https://ewatch.io/twitter-card.png">
-```
+Allows browsers to register E-Watch as a search provider, routing queries to `/explorer?q={searchTerms}`.
 
-#### Schema.org Structured Data
+---
 
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "E-Watch",
-  "description": "Blockchain event monitoring platform",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web Browser"
+## 3. Structured Data (schema.org)
+
+All emitted via `<script type="application/ld+json">` components in `StructuredData.tsx`:
+
+| Schema | Component | Purpose |
+|--------|-----------|---------|
+| Organization | `<OrganizationSchema />` | Knowledge panel, logo, social profiles |
+| WebApplication | `<WebAppSchema />` | Software rich results, free pricing |
+| BreadcrumbList | `<BreadcrumbSchema />` | Breadcrumb trail in SERPs |
+| FAQPage | `<FAQSchema />` | Expandable FAQ cards in search |
+| SoftwareSourceCode | `<SoftwareSourceCodeSchema />` | Open-source repo metadata |
+
+---
+
+## 4. Accessibility (WCAG 2.1 AA)
+
+### Skip-to-content
+
+`<SkipToContent />` is the first rendered element. Hidden until focused — keyboard users press Tab → Enter to bypass the header.
+
+### ARIA Landmarks
+
+| Element | Role | Identifier |
+|---------|------|------------|
+| `<header>` | banner | — |
+| `<main>` | main | `#main-content` |
+| `<footer>` | contentinfo | — |
+| Search section | search | `aria-label="Event search"` |
+
+### Form Accessibility
+
+- `aria-required`, `aria-invalid`, `aria-describedby` on all inputs
+- Required-field indicators with `<span class="required">`
+- Character counters in `aria-describedby` help text
+- `aria-live="polite"` on error/success messages
+- `aria-busy` on loading buttons
+
+### Wallet Connect
+
+- `<nav>` landmark with `aria-label="Wallet connection"`
+- `<abbr>` for truncated addresses (full address in `title`)
+- `role="status"` announces connection changes
+
+### Reduced Motion
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 ```
 
-### 4. SEO Component
+---
 
-**Location:** `/frontend/src/components/SEO.tsx`
+## 5. Component Inventory
 
-**Purpose:** Dynamic meta tag management for different pages.
+### SEOFooter
 
-**Features:**
-- Runtime meta tag updates
-- Page-specific titles and descriptions
-- Open Graph support
-- Twitter Card support
-- Canonical URL management
-- noindex option for non-public pages
+Four-column footer with 12+ internal navigation links organized by:
+- **Product:** Dashboard, Register, Explorer, Getting Started
+- **Resources:** Docs, API, Smart Contracts, FAQ
+- **Company:** About, Privacy, Terms, GitHub
 
-**Usage Example:**
+Internal links distribute page authority (PageRank) across the site.
 
-```tsx
-import { SEO } from './components/SEO';
+### SEOImage
 
-<SEO
-  title="Event Dashboard - E-Watch"
-  description="View and search blockchain events on Stacks"
-  keywords="blockchain, events, dashboard, stacks"
-  ogImage="https://ewatch.io/dashboard-preview.png"
-  canonicalUrl="https://ewatch.io/dashboard"
-/>
-```
+Drop-in `<img>` replacement:
+- `alt` is **required** (TypeScript enforced)
+- `loading="lazy"` default for better LCP
+- `decoding="async"` for non-blocking decode
+- Optional `caption` renders `<figure>` + `<figcaption>`
 
-## Accessibility Enhancements
+### SEO Config (`seo.config.ts`)
 
-### ARIA Attributes
+Single source of truth for `SITE_CONFIG`, `PAGE_META`, and `SCHEMA_ORG`. No hardcoded SEO strings in components.
 
-All components implement comprehensive ARIA attributes:
+---
 
-- `role` attributes for semantic landmarks
-- `aria-label` for descriptive labels
-- `aria-labelledby` for heading associations
-- `aria-describedby` for help text
-- `aria-required` for form validation
-- `aria-invalid` for error states
-- `aria-live` for dynamic content
-- `aria-busy` for loading states
+## 6. Performance Considerations
 
-### Semantic HTML
+- **Code splitting:** Vite splits vendor (React) and stacks libraries into separate chunks
+- **Console stripping:** `drop_console: true` in production builds
+- **Lazy images:** `loading="lazy"` on all images via SEOImage
+- **Preconnect:** Eliminates DNS + TLS round-trips to Stacks API
+- **Minimal CSS:** No unused dark-mode styles, no Vite boilerplate
 
-- `<header>`, `<main>`, `<footer>` for page structure
-- `<section>` and `<article>` for content grouping
-- `<nav>` for navigation
-- Proper heading hierarchy (H1 → H2 → H3)
-- `<time>` elements for timestamps
-- `<dl>`, `<dt>`, `<dd>` for definition lists
+---
 
-### Screen Reader Support
+## 7. Testing Checklist
 
-- `.sr-only` CSS class for screen reader-only content
-- Descriptive button text
-- Form labels properly associated with inputs
-- Skip navigation links
-- Focus management
+### SEO Validation
+- [ ] `curl -s https://ewatch.io/robots.txt` returns valid rules
+- [ ] `curl -s https://ewatch.io/sitemap.xml` returns valid XML
+- [ ] Google Rich Results Test passes for all structured data
+- [ ] Facebook Sharing Debugger shows correct OG image/title
+- [ ] Twitter Card Validator shows `summary_large_image`
+- [ ] Lighthouse SEO score ≥ 95
 
-## Component-Level Optimizations
+### Accessibility Validation
+- [ ] Tab through entire page — skip link works on first press
+- [ ] VoiceOver reads all form labels and error messages
+- [ ] Color contrast ratio ≥ 4.5:1 (WCAG AA)
+- [ ] No heading-level skips (H1 → H2 → H3 → H4)
+- [ ] `prefers-reduced-motion` disables animations
 
-### EventRegistration Component
-
-**Optimizations:**
-- Semantic `<section>` element
-- H2 heading: "Register New Blockchain Event"
-- Descriptive section description
-- ARIA labels on all form fields
-- Required field indicators
-- Character count helpers
-- Error/success message accessibility
-- Loading state indicators
-
-### EventDashboard Component
-
-**Optimizations:**
-- Semantic `<section>` element
-- H2 heading: "Event Dashboard"
-- H3 for subsections
-- H4 for individual event titles
-- Search landmark with ARIA
-- Filter controls with proper labels
-- Semantic event list (`<ul>`, `<li>`)
-- Definition lists for event details
-- Time elements for timestamps
-- Status indicators with ARIA
-
-### App Component
-
-**Optimizations:**
-- Header with `role="banner"`
-- Main content with `role="main"`
-- Footer with `role="contentinfo"`
-- Descriptive H1: "E-Watch - Blockchain Event Monitoring"
-- SEO component integration
-- Copyright information
-- Proper semantic structure
-
-## Technical SEO Features
-
-### Page Speed
-
-- React 19 with optimized rendering
-- Vite for fast builds and HMR
-- Code splitting for smaller bundles
-- Lazy loading where appropriate
-
-### Mobile Optimization
-
-- Responsive design with media queries
-- Mobile-first CSS approach
-- Touch-friendly interactive elements
-- Proper viewport meta tag
-
-### Performance
-
-- Minimal dependencies
-- Optimized images (webp format recommended)
-- Efficient re-rendering with React hooks
-- CSS bundling and minification
-
-### Security
-
-- HTTPS required (configured in production)
-- Content Security Policy headers
-- No mixed content
-- Secure cookie handling
-
-## Best Practices
-
-### Content Strategy
-
-1. **Unique Titles:** Each page has a unique, descriptive title (50-60 characters)
-2. **Meta Descriptions:** Compelling descriptions (150-160 characters)
-3. **Heading Hierarchy:** Logical H1 → H2 → H3 structure
-4. **Alt Text:** All images should have descriptive alt text
-5. **Internal Linking:** Cross-link between related pages
-
-### URL Structure
-
-- Clean, readable URLs
-- Hyphens for word separation
-- Lowercase letters
-- No unnecessary parameters
-
-### Social Media Optimization
-
-- Open Graph images (1200x630px)
-- Twitter Card images (800x418px)
-- Descriptive social media titles
-- Engaging preview descriptions
-
-## Monitoring and Maintenance
-
-### Tools for Monitoring
-
-1. **Google Search Console:** Track indexing and search performance
-2. **Google Analytics:** Monitor user behavior and traffic sources
-3. **Lighthouse:** Regular performance and SEO audits
-4. **Bing Webmaster Tools:** Microsoft search presence
-5. **Schema Validator:** Verify structured data
-
-### Regular Tasks
-
-- [ ] Update sitemap.xml when adding new pages
-- [ ] Review meta descriptions quarterly
-- [ ] Check for broken links monthly
-- [ ] Monitor Core Web Vitals
-- [ ] Update structured data as schema.org evolves
-- [ ] Test accessibility with screen readers
-- [ ] Review and update robots.txt as needed
-
-## Testing Checklist
-
-### SEO Testing
-
-- [ ] Verify robots.txt is accessible
-- [ ] Confirm sitemap.xml loads correctly
-- [ ] Test meta tags with browser dev tools
-- [ ] Validate Open Graph with Facebook Debugger
-- [ ] Test Twitter Cards with Card Validator
-- [ ] Run Lighthouse SEO audit
-- [ ] Check mobile responsiveness
-- [ ] Verify canonical URLs
-- [ ] Test structured data with Google Rich Results
-
-### Accessibility Testing
-
-- [ ] Navigate with keyboard only
-- [ ] Test with screen reader (NVDA, JAWS, VoiceOver)
-- [ ] Check color contrast ratios (WCAG AA)
-- [ ] Verify ARIA attributes
-- [ ] Test form validation errors
-- [ ] Check focus indicators
-- [ ] Verify heading hierarchy
-- [ ] Test with browser zoom at 200%
-
-## Results and Metrics
-
-### Expected Improvements
-
-1. **Search Rankings:** Better visibility in search results
-2. **Click-Through Rate:** Improved with compelling meta descriptions
-3. **Social Shares:** Enhanced preview cards increase engagement
-4. **Accessibility Score:** WCAG 2.1 AA compliance
-5. **Core Web Vitals:** Optimized performance metrics
-6. **Crawl Efficiency:** Faster indexing with sitemap
-
-### Success Metrics
-
-- Organic search traffic increase
-- Lower bounce rate
-- Higher time on site
-- Improved accessibility audit scores
-- Better search result positioning
-- Increased social media referrals
+---
 
 ## References
 
 - [Google Search Central](https://developers.google.com/search)
 - [Open Graph Protocol](https://ogp.me/)
-- [Twitter Cards Documentation](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards)
+- [Twitter Cards](https://developer.twitter.com/en/docs/twitter-for-websites/cards)
 - [Schema.org](https://schema.org/)
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [ARIA Practices](https://www.w3.org/WAI/ARIA/apg/)
-
-## Support
-
-For questions or issues related to SEO implementation, please refer to the project's main documentation or open an issue on GitHub.
+- [WCAG 2.1](https://www.w3.org/WAI/WCAG21/quickref/)
+- [web.dev Core Web Vitals](https://web.dev/vitals/)
+- [OpenSearch](https://github.com/dewitt/opensearch)
+- [humanstxt.org](https://humanstxt.org/)
 
 ---
 
-**Last Updated:** January 2025  
-**Maintained By:** E-Watch Development Team  
-**Version:** 1.0.0
+**Maintained by:** E-Watch Development Team
+**Version:** 2.0.0

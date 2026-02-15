@@ -59,15 +59,32 @@ export const WalletConnect = () => {
   };
 
   return (
-    <div className="wallet-connect">
+    <nav className="wallet-connect" aria-label="Wallet connection">
       {isAuthenticated && userAddress ? (
-        <div>
-          <p>Connected: {userAddress}</p>
-          <button onClick={disconnectWallet}>Disconnect</button>
+        <div className="wallet-info" role="status">
+          <p aria-label={`Connected wallet address: ${userAddress}`}>
+            <span className="wallet-label">Connected:</span>{' '}
+            <abbr title={userAddress} className="wallet-address">
+              {userAddress.slice(0, 6)}…{userAddress.slice(-4)}
+            </abbr>
+          </p>
+          <button
+            onClick={disconnectWallet}
+            aria-label="Disconnect wallet"
+            className="btn-disconnect"
+          >
+            Disconnect
+          </button>
         </div>
       ) : (
-        <button onClick={connectWallet}>Connect Wallet</button>
+        <button
+          onClick={connectWallet}
+          aria-label="Connect your Stacks wallet to start monitoring events"
+          className="btn-connect"
+        >
+          Connect Wallet
+        </button>
       )}
-    </div>
+    </nav>
   );
 };

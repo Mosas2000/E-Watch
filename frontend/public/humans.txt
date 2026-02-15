@@ -1,0 +1,16 @@
+/* TEAM */
+
+Developer: E-Watch Team
+Contact: support@ewatch.io
+Twitter: @ewatch_io
+GitHub: https://github.com/ewatch
+Location: Remote / Worldwide
+
+/* SITE */
+
+Last update: 2026/02/15
+Standards: HTML5, CSS3, ECMAScript 2022
+Language: English
+Software: React 19, TypeScript 5, Vite 7, Clarity
+Blockchain: Stacks (Bitcoin L2)
+Components: Hiro Wallet SDK, @stacks/connect, @stacks/transactions

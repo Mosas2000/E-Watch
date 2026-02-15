@@ -1,31 +1,83 @@
-# E-Watch Robots.txt
-# Allow all search engines to crawl the site
+# ==============================================
+# E-Watch - Robots.txt Configuration
+# https://ewatch.io/robots.txt
+# Last updated: 2026-02-15
+# ==============================================
 
+# Default rules for all well-behaved crawlers
 User-agent: *
 Allow: /
-
-# Sitemap location
-Sitemap: https://ewatch.io/sitemap.xml
-
-# Crawl-delay for specific bots (optional)
-User-agent: Googlebot
-Crawl-delay: 0
-
-User-agent: Bingbot
 Crawl-delay: 1
 
-# Block access to certain paths if needed (currently none)
-# Disallow: /admin/
-# Disallow: /private/
-
-# Allow indexing of CSS and JS files for proper rendering
+# Google Search - no delay, respects server load natively
 User-agent: Googlebot
+Allow: /
 Allow: /*.css$
 Allow: /*.js$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.svg$
+Crawl-delay: 0
 
-# Block bad bots
+# Bing Search
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+# DuckDuckGo
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+# Yandex
+User-agent: YandexBot
+Allow: /
+Crawl-delay: 5
+
+# Baidu
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 5
+
+# Rate-limit aggressive SEO crawlers
 User-agent: AhrefsBot
 Crawl-delay: 10
 
 User-agent: SemrushBot
 Crawl-delay: 10
+
+User-agent: MJ12bot
+Crawl-delay: 15
+
+User-agent: DotBot
+Crawl-delay: 15
+
+# Block known AI training scrapers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+# Block content scrapers and spam bots
+User-agent: Bytespider
+Disallow: /
+
+# Disallow internal/private paths for all agents
+User-agent: *
+Disallow: /api/internal/
+Disallow: /admin/
+Disallow: /_debug/
+Disallow: /*.json$
+
+# Sitemap reference
+Sitemap: https://ewatch.io/sitemap.xml

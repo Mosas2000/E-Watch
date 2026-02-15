@@ -2,32 +2,57 @@ import { WalletConnect } from './components/WalletConnect';
 import { EventRegistration } from './components/EventRegistration';
 import { EventDashboard } from './components/EventDashboard';
 import { AppProvider } from './contexts/AppContext';
-import SEO from './components/SEO';
+import { SkipToContent } from './components/SkipToContent';
+import { SEOFooter } from './components/SEOFooter';
+import {
+  BreadcrumbSchema,
+  OrganizationSchema,
+  WebAppSchema,
+} from './components/StructuredData';
+import { usePageSEO } from './hooks/usePageSEO';
+import { PAGE_META, SITE_CONFIG } from './config/seo.config';
 import './App.css';
 
 function App() {
+  usePageSEO({
+    title: PAGE_META.home.title,
+    description: PAGE_META.home.description,
+    keywords: PAGE_META.home.keywords,
+    canonical: PAGE_META.home.canonical,
+  });
+
   return (
     <AppProvider>
-      <SEO
-        title="E-Watch - Blockchain Event Monitoring for Stacks"
-        description="Register, query, and manage blockchain events on Stacks network. Real-time monitoring with secure wallet integration."
-        keywords="blockchain, stacks, event monitoring, smart contracts, clarity, web3, dapp"
-        canonical="https://ewatch.io/"
+      {/* Structured data for search engine rich results */}
+      <OrganizationSchema />
+      <WebAppSchema />
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Dashboard', path: '/dashboard' },
+        ]}
       />
+
+      {/* Keyboard accessibility: skip to main content */}
+      <SkipToContent />
+
       <div className="container">
         <header className="header" role="banner">
-          <h1>E-Watch - Blockchain Event Monitoring</h1>
+          <h1>
+            <a href="/" className="logo-link" aria-label={`${SITE_CONFIG.name} home`}>
+              {SITE_CONFIG.name}
+              <span className="tagline"> — {SITE_CONFIG.tagline}</span>
+            </a>
+          </h1>
           <WalletConnect />
         </header>
-        
-        <main role="main">
+
+        <main id="main-content" role="main" aria-label="Primary content">
           <EventRegistration />
           <EventDashboard />
         </main>
-        
-        <footer className="footer" role="contentinfo">
-          <p>&copy; 2026 E-Watch. Blockchain event monitoring on Stacks network.</p>
-        </footer>
+
+        <SEOFooter />
       </div>
     </AppProvider>
   );

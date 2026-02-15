@@ -10,12 +10,25 @@
     <meta name="description" content="Comprehensive blockchain event monitoring system on Stacks. Register, query, and manage on-chain events with real-time tracking and secure wallet integration." />
     <meta name="keywords" content="blockchain, stacks, event monitoring, smart contracts, clarity, cryptocurrency, web3, dapp, decentralized" />
     <meta name="author" content="E-Watch Team" />
+    <link rel="author" href="/humans.txt" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
     <meta name="revisit-after" content="7 days" />
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://ewatch.io/" />
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/site.webmanifest" />
+    
+    <!-- OpenSearch - lets browsers add E-Watch as a search engine -->
+    <link rel="search" type="application/opensearchdescription+xml" title="E-Watch" href="/opensearch.xml" />
+    
+    <!-- Resource Hints - preconnect to external services -->
+    <link rel="preconnect" href="https://stacks-node-api.mainnet.stacks.co" crossorigin />
+    <link rel="dns-prefetch" href="https://stacks-node-api.mainnet.stacks.co" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -76,6 +89,21 @@
     </script>
   </head>
   <body>
+    <!-- No-JavaScript fallback for SEO crawlers -->
+    <noscript>
+      <div style="padding: 2rem; text-align: center; font-family: sans-serif;">
+        <h1>E-Watch - Blockchain Event Monitoring</h1>
+        <p>E-Watch requires JavaScript to run. Please enable JavaScript in your browser to use the full application.</p>
+        <p>E-Watch is a blockchain event monitoring platform built on the Stacks network, offering real-time event tracking, registration, and management through smart contracts.</p>
+        <nav>
+          <ul>
+            <li><a href="https://ewatch.io/docs">Documentation</a></li>
+            <li><a href="https://ewatch.io/about">About E-Watch</a></li>
+            <li><a href="https://ewatch.io/faq">FAQ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

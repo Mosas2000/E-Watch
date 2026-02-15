@@ -33,6 +33,52 @@ body {
   font-size: 24px;
 }
 
+/* Logo link in header */
+.logo-link {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.logo-link:hover {
+  opacity: 0.8;
+  text-decoration: none;
+}
+.tagline {
+  font-weight: 400;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Wallet address truncation */
+.wallet-label {
+  font-weight: 500;
+  color: #666;
+}
+.wallet-address {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #5546ff;
+  text-decoration: none;
+  border-bottom: 1px dotted #5546ff;
+}
+.wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn-disconnect {
+  font-size: 12px;
+  padding: 8px 16px;
+  background: #e74c3c;
+}
+.btn-disconnect:hover:not(:disabled) {
+  background: #c0392b;
+}
+.btn-connect {
+  background: #5546ff;
+  font-weight: 600;
+}
+
 button {
   padding: 12px 24px;
   background: #5546ff;
@@ -410,7 +456,7 @@ input:focus, textarea:focus, select:focus {
   font-size: 13px;
 }
 
-/* Responsive Design for Footer */
+/* Responsive Design */
 @media (max-width: 768px) {
   .footer-content {
     flex-direction: column;
@@ -428,4 +474,36 @@ input:focus, textarea:focus, select:focus {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .tagline {
+    display: none;
+  }
+
+  .wallet-info {
+    flex-direction: column;
+  }
+}
+
+/* SEO Image component */
+.seo-image-figure {
+  margin: 0;
+  line-height: 0;
+}
+.seo-image-figure img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+.seo-image-figure figcaption {
+  line-height: 1.4;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666;
+  text-align: center;
 }

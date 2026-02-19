@@ -10,3 +10,8 @@ epoch = 2.5
 path = "contracts/ewatch-v2.clar"
 clarity_version = 2
 epoch = 2.5
+
+[contracts.governance]
+path = "contracts/governance.clar"
+clarity_version = 2
+epoch = 2.5

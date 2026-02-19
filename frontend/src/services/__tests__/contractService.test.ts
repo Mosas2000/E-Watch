@@ -23,6 +23,7 @@ vi.mock('../auth', () => ({
     isUserSignedIn: vi.fn(() => true),
   },
   isAuthenticated: vi.fn(() => true),
+  requireAuth: vi.fn(),
 }));
 
 vi.mock('../utils/logger', () => ({
@@ -72,8 +73,10 @@ describe('contractService', () => {
 
   describe('registerEvent', () => {
     it('should throw when user is not authenticated', async () => {
-      const { isAuthenticated } = await import('../auth');
-      vi.mocked(isAuthenticated).mockReturnValueOnce(false);
+      const { requireAuth } = await import('../auth');
+      vi.mocked(requireAuth).mockImplementationOnce(() => {
+        throw new Error('User must be signed in to register an event');
+      });
 
       const { registerEvent } = await import('./contractService');
       await expect(registerEvent('alert', 'test data')).rejects.toThrow(
@@ -114,8 +117,10 @@ describe('contractService', () => {
 
   describe('updateEvent', () => {
     it('should throw when user is not authenticated', async () => {
-      const { isAuthenticated } = await import('../auth');
-      vi.mocked(isAuthenticated).mockReturnValueOnce(false);
+      const { requireAuth } = await import('../auth');
+      vi.mocked(requireAuth).mockImplementationOnce(() => {
+        throw new Error('User must be signed in to update an event');
+      });
 
       const { updateEvent } = await import('./contractService');
       await expect(updateEvent(1, 'new data')).rejects.toThrow(
@@ -155,8 +160,10 @@ describe('contractService', () => {
 
   describe('deactivateEvent', () => {
     it('should throw when user is not authenticated', async () => {
-      const { isAuthenticated } = await import('../auth');
-      vi.mocked(isAuthenticated).mockReturnValueOnce(false);
+      const { requireAuth } = await import('../auth');
+      vi.mocked(requireAuth).mockImplementationOnce(() => {
+        throw new Error('User must be signed in to deactivate an event');
+      });
 
       const { deactivateEvent } = await import('./contractService');
       await expect(deactivateEvent(1)).rejects.toThrow(

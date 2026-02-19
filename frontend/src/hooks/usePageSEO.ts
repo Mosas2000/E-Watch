@@ -82,7 +82,9 @@ export function usePageSEO({
     upsertMeta('name', 'twitter:title', title);
     upsertMeta('name', 'twitter:description', description);
     upsertMeta('name', 'twitter:image', ogImage);
+    upsertMeta('name', 'twitter:image:alt', title);
     upsertMeta('name', 'twitter:creator', SITE_CONFIG.twitterHandle);
+    upsertMeta('name', 'twitter:site', SITE_CONFIG.twitterHandle);
 
     // --- Canonical -------------------------------------------------------
     let link = document.querySelector<HTMLLinkElement>(

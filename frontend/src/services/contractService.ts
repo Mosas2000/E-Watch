@@ -11,10 +11,10 @@ import {
 import { STACKS_MAINNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
 import logger from '../utils/logger';
+import { getActiveContract } from '../config/contractConfig';
 
 const network = STACKS_MAINNET;
-const contractAddress = 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T';
-const contractName = 'ewatch';
+const { address: contractAddress, name: contractName } = getActiveContract();
 
 export const registerEvent = async (eventType: string, data: string) => {
   logger.info('Initiating event registration', {

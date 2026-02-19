@@ -1,0 +1,71 @@
+/* --------------------------------------------------------------------------- */
+/* Status Page Styles                                                          */
+/* --------------------------------------------------------------------------- */
+
+.status-page h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.status-page h3 {
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.status-page section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Service row hover */
+.status-page section > div[style*="border: 1px solid"]:hover {
+  background-color: #f6f8fa;
+  transition: background-color 0.15s ease;
+}
+
+/* Uptime bar tooltip styling */
+.uptime-bar div:hover {
+  opacity: 0.85;
+  transform: scaleY(1.15);
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+/* Incident card hover */
+.incident-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.15s ease;
+}
+
+/* SLA compliance card transition */
+.sla-compliance-card {
+  transition: box-shadow 0.15s ease;
+}
+
+.sla-compliance-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Refresh button */
+.status-page button:hover:not(:disabled) {
+  background-color: #eaeef2;
+  border-color: #afb8c1;
+}
+
+.status-page button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .status-page {
+    padding: 12px !important;
+  }
+
+  .sla-compliance-card > div:last-child {
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -2,6 +2,7 @@ import { WalletConnect } from './components/WalletConnect';
 import { EventRegistration } from './components/EventRegistration';
 import { EventDashboard } from './components/EventDashboard';
 import { GovernanceDashboard } from './components/GovernanceDashboard';
+import { StatusPage } from './components/StatusPage';
 import { AppProvider } from './contexts/AppContext';
 import { SkipToContent } from './components/SkipToContent';
 import { SEOFooter } from './components/SEOFooter';
@@ -46,6 +47,7 @@ function App() {
           { name: 'Home', path: '/' },
           { name: 'Dashboard', path: '/dashboard' },
           { name: 'Governance', path: '/governance' },
+          { name: 'Status', path: '/status' },
         ]}
       />
 
@@ -75,6 +77,9 @@ function App() {
           </ErrorBoundary>
           <ErrorBoundary boundary="governance" fallback={<DashboardFallback />}>
             <GovernanceDashboard />
+          </ErrorBoundary>
+          <ErrorBoundary boundary="status-page" fallback={<DashboardFallback />}>
+            <StatusPage />
           </ErrorBoundary>
         </main>
 

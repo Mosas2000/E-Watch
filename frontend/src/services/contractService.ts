@@ -1,6 +1,4 @@
 import {
-  makeContractCall,
-  broadcastTransaction,
   AnchorMode,
   PostConditionMode,
   stringAsciiCV,

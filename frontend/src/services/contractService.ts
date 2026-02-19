@@ -88,6 +88,7 @@ export const registerEvent = async (eventType: string, data: string) => {
           eventType,
           txid: data.txId,
         });
+        invalidateCache();
         resolve(data);
       },
       onCancel: () => {

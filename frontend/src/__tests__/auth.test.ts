@@ -87,4 +87,26 @@ describe('auth module', () => {
       expect(typeof userSession.isUserSignedIn).toBe('function');
     });
   });
+
+  describe('requireAuth', () => {
+    it('should not throw when user is authenticated', async () => {
+      const connect = await import('@stacks/connect');
+      const mocks = (connect as any).__mocks__;
+      mocks.isSignedIn.mockReturnValue(true);
+
+      const { requireAuth } = await import('../auth');
+      expect(() => requireAuth('perform action')).not.toThrow();
+    });
+
+    it('should throw with action label when user is not authenticated', async () => {
+      const connect = await import('@stacks/connect');
+      const mocks = (connect as any).__mocks__;
+      mocks.isSignedIn.mockReturnValue(false);
+
+      const { requireAuth } = await import('../auth');
+      expect(() => requireAuth('update an event')).toThrow(
+        'User must be signed in to update an event',
+      );
+    });
+  });
 });

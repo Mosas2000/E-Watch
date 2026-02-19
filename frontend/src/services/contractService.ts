@@ -28,6 +28,17 @@ const countCache = new RequestCache<unknown>(15_000, 1);
 // Rate limiter: allow 20 read-only calls per minute
 const readLimiter = new RateLimiter(20, 60_000);
 
+/**
+ * Invalidate all cached data. Call this after a write operation
+ * (register, update, deactivate) to ensure subsequent reads
+ * fetch fresh data from the contract.
+ */
+export const invalidateCache = () => {
+  eventCache.clear();
+  countCache.clear();
+  logger.debug('All contract caches invalidated');
+};
+
 export const registerEvent = async (eventType: string, data: string) => {
   logger.info('Initiating event registration', {
     eventType,

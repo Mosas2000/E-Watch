@@ -8,7 +8,7 @@ import {
 } from '@stacks/transactions';
 import { STACKS_MAINNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
-import { userSession, isAuthenticated } from '../auth';
+import { userSession, isAuthenticated, requireAuth } from '../auth';
 import logger from '../utils/logger';
 import { RequestCache } from '../utils/requestCache';
 import { RateLimiter } from '../utils/rateLimiter';
@@ -48,10 +48,7 @@ export const invalidateCache = () => {
  * @throws If the user is not authenticated, input is invalid, or the user cancels
  */
 export const registerEvent = async (eventType: string, data: string) => {
-  if (!isAuthenticated()) {
-    logger.warn('Attempted event registration without authentication');
-    throw new Error('User must be signed in to register an event');
-  }
+  requireAuth('register an event');
 
   if (!eventType || eventType.trim().length === 0) {
     throw new Error('eventType must not be empty');
@@ -270,10 +267,7 @@ export const getEventCount = async () => {
  * @throws If not authenticated, input is invalid, or the user cancels
  */
 export const updateEvent = async (eventId: number, newData: string) => {
-  if (!isAuthenticated()) {
-    logger.warn('Attempted event update without authentication', { eventId });
-    throw new Error('User must be signed in to update an event');
-  }
+  requireAuth('update an event');
 
   if (!Number.isInteger(eventId) || eventId < 1) {
     throw new Error('eventId must be a positive integer');
@@ -326,10 +320,7 @@ export const updateEvent = async (eventId: number, newData: string) => {
  * @throws If not authenticated, eventId is invalid, or the user cancels
  */
 export const deactivateEvent = async (eventId: number) => {
-  if (!isAuthenticated()) {
-    logger.warn('Attempted event deactivation without authentication', { eventId });
-    throw new Error('User must be signed in to deactivate an event');
-  }
+  requireAuth('deactivate an event');
 
   if (!Number.isInteger(eventId) || eventId < 1) {
     throw new Error('eventId must be a positive integer');

@@ -2,8 +2,16 @@
 ;;
 ;; Migration-ready upgrade of the original ewatch contract.
 ;; Adds version tracking, migration support functions, and
-;; batch operations while maintaining backward compatibility
+;; admin controls while maintaining backward compatibility
 ;; with the existing event data structure.
+;;
+;; Changes from v1:
+;;   - Admin role with transferable ownership
+;;   - Contract pause/unpause for maintenance windows
+;;   - migrate-event for importing v1 data
+;;   - set-event-counter for counter alignment
+;;   - get-version for on-chain version identification
+;;   - ERR-PAUSED (u503) for pause-gated operations
 
 ;; ── Data Storage ──────────────────────────────────────────
 

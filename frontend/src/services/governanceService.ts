@@ -6,16 +6,17 @@ import {
   fetchCallReadOnlyFunction,
   cvToJSON,
 } from '@stacks/transactions';
-import { STACKS_MAINNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
 import { AnchorMode, PostConditionMode } from '@stacks/transactions';
+import { getStacksNetwork } from '../config/networkConfig';
+import { env } from '../config/env';
 import logger from '../utils/logger';
 
-const network = STACKS_MAINNET;
+const network = getStacksNetwork();
 
-// Governance contract details - update address after deployment
-const GOVERNANCE_CONTRACT_ADDRESS = 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T';
-const GOVERNANCE_CONTRACT_NAME = 'governance';
+// Governance contract details - driven by environment config
+const GOVERNANCE_CONTRACT_ADDRESS = env.contractAddress;
+const GOVERNANCE_CONTRACT_NAME = env.governanceContractName;
 
 export interface Proposal {
   id: number;

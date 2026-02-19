@@ -1,6 +1,15 @@
+// ---------------------------------------------------------------------------
+// Contract Service
+// ---------------------------------------------------------------------------
+// Provides typed wrappers around all smart-contract interactions for the
+// E-Watch application.  Write operations use openContractCall (wallet popup)
+// while read operations use fetchCallReadOnlyFunction (no wallet needed).
+//
+// Authentication: every write function calls requireAuth() before it does
+// anything else so unauthenticated requests fail fast with a clear message.
+// ---------------------------------------------------------------------------
+
 import {
-  makeContractCall,
-  broadcastTransaction,
   AnchorMode,
   PostConditionMode,
   stringAsciiCV,
@@ -10,6 +19,7 @@ import {
 } from '@stacks/transactions';
 import { openContractCall } from '@stacks/connect';
 import { getStacksNetwork } from '../config/networkConfig';
+import { requireAuth } from '../auth';
 import logger from '../utils/logger';
 import { RequestCache } from '../utils/requestCache';
 import { RateLimiter } from '../utils/rateLimiter';
@@ -39,7 +49,34 @@ export const invalidateCache = () => {
   logger.debug('All contract caches invalidated');
 };
 
+/**
+ * Register a new event on the smart contract.
+ * Opens the Stacks wallet for the user to sign and broadcast the transaction.
+ *
+ * @param eventType - Category label for the event (max 128 ASCII characters)
+ * @param data - Payload string describing the event (max 256 ASCII characters)
+ * @returns Promise resolving with the finished transaction data
+ * @throws If the user is not authenticated, input is invalid, or the user cancels
+ */
 export const registerEvent = async (eventType: string, data: string) => {
+  requireAuth('register an event');
+
+  if (!eventType || eventType.trim().length === 0) {
+    throw new Error('eventType must not be empty');
+  }
+
+  if (eventType.length > 128) {
+    throw new Error('eventType exceeds maximum length of 128 characters');
+  }
+
+  if (!data || data.trim().length === 0) {
+    throw new Error('data must not be empty');
+  }
+
+  if (data.length > 256) {
+    throw new Error('data exceeds maximum length of 256 characters');
+  }
+
   logger.info('Initiating event registration', {
     eventType,
     dataLength: data.length,
@@ -59,6 +96,7 @@ export const registerEvent = async (eventType: string, data: string) => {
           eventType,
           txid: data.txId,
         });
+        invalidateCache();
         resolve(data);
       },
       onCancel: () => {
@@ -71,7 +109,19 @@ export const registerEvent = async (eventType: string, data: string) => {
   });
 };
 
+/**
+ * Fetch a single event from the smart contract by its numeric identifier.
+ * Results are cached for 30 seconds to reduce redundant on-chain reads.
+ *
+ * @param eventId - Positive integer identifying the event
+ * @returns Parsed JSON representation of the Clarity return value
+ * @throws On network failure, rate limiting, or invalid eventId
+ */
 export const getEvent = async (eventId: number) => {
+  if (!Number.isInteger(eventId) || eventId < 1) {
+    throw new Error('eventId must be a positive integer');
+  }
+
   const cacheKey = `event:${eventId}`;
 
   // Return cached result if available
@@ -144,6 +194,13 @@ export const getEvent = async (eventId: number) => {
   }
 };
 
+/**
+ * Retrieve the total number of registered events from the contract.
+ * Results are cached for 15 seconds since the count changes with each registration.
+ *
+ * @returns Parsed JSON representation of the event count
+ * @throws On network failure or rate limiting
+ */
 export const getEventCount = async () => {
   const cacheKey = 'event-count';
 
@@ -211,38 +268,98 @@ export const getEventCount = async () => {
   }
 };
 
+/**
+ * Update the data payload of an existing event on the contract.
+ * Requires an active user session. Opens the wallet for transaction signing.
+ *
+ * @param eventId - Positive integer identifying the event to update
+ * @param newData - Replacement data string (max 256 ASCII characters)
+ * @returns Promise resolving with the finished transaction data
+ * @throws If not authenticated, input is invalid, or the user cancels
+ */
 export const updateEvent = async (eventId: number, newData: string) => {
-  const userData = userSession.loadUserData();
-  
-  const txOptions = {
-    contractAddress,
-    contractName,
-    functionName: 'update-event',
-    functionArgs: [uintCV(eventId), stringAsciiCV(newData)],
-    senderKey: userData.appPrivateKey,
-    network,
-    anchorMode: AnchorMode.Any,
-    postConditionMode: PostConditionMode.Allow,
-  };
+  requireAuth('update an event');
 
-  const transaction = await makeContractCall(txOptions);
-  return broadcastTransaction({ transaction, network });
+  if (!Number.isInteger(eventId) || eventId < 1) {
+    throw new Error('eventId must be a positive integer');
+  }
+
+  if (!newData || newData.trim().length === 0) {
+    throw new Error('newData must not be empty');
+  }
+
+  if (newData.length > 256) {
+    throw new Error('newData exceeds maximum length of 256 characters');
+  }
+
+  logger.info('Initiating event update', {
+    eventId,
+    dataLength: newData.length,
+  });
+
+  return new Promise((resolve, reject) => {
+    openContractCall({
+      contractAddress,
+      contractName,
+      functionName: 'update-event',
+      functionArgs: [uintCV(eventId), stringAsciiCV(newData)],
+      network,
+      anchorMode: AnchorMode.Any,
+      postConditionMode: PostConditionMode.Allow,
+      onFinish: (data) => {
+        logger.transaction('Event update completed', {
+          eventId,
+          txid: data.txId,
+        });
+        invalidateCache();
+        resolve(data);
+      },
+      onCancel: () => {
+        logger.warn('Event update cancelled by user', { eventId });
+        reject(new Error('Transaction cancelled by user'));
+      },
+    });
+  });
 };
 
+/**
+ * Deactivate an event on the contract, marking it as inactive.
+ * Requires an active user session. Opens the wallet for transaction signing.
+ *
+ * @param eventId - Positive integer identifying the event to deactivate
+ * @returns Promise resolving with the finished transaction data
+ * @throws If not authenticated, eventId is invalid, or the user cancels
+ */
 export const deactivateEvent = async (eventId: number) => {
-  const userData = userSession.loadUserData();
-  
-  const txOptions = {
-    contractAddress,
-    contractName,
-    functionName: 'deactivate-event',
-    functionArgs: [uintCV(eventId)],
-    senderKey: userData.appPrivateKey,
-    network,
-    anchorMode: AnchorMode.Any,
-    postConditionMode: PostConditionMode.Allow,
-  };
+  requireAuth('deactivate an event');
 
-  const transaction = await makeContractCall(txOptions);
-  return broadcastTransaction({ transaction, network });
+  if (!Number.isInteger(eventId) || eventId < 1) {
+    throw new Error('eventId must be a positive integer');
+  }
+
+  logger.info('Initiating event deactivation', { eventId });
+
+  return new Promise((resolve, reject) => {
+    openContractCall({
+      contractAddress,
+      contractName,
+      functionName: 'deactivate-event',
+      functionArgs: [uintCV(eventId)],
+      network,
+      anchorMode: AnchorMode.Any,
+      postConditionMode: PostConditionMode.Allow,
+      onFinish: (data) => {
+        logger.transaction('Event deactivation completed', {
+          eventId,
+          txid: data.txId,
+        });
+        invalidateCache();
+        resolve(data);
+      },
+      onCancel: () => {
+        logger.warn('Event deactivation cancelled by user', { eventId });
+        reject(new Error('Transaction cancelled by user'));
+      },
+    });
+  });
 };

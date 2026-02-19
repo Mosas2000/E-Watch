@@ -10,6 +10,7 @@ import { openContractCall } from '@stacks/connect';
 import { AnchorMode, PostConditionMode } from '@stacks/transactions';
 import { getStacksNetwork } from '../config/networkConfig';
 import { env } from '../config/env';
+import { requireAuth } from '../auth';
 import logger from '../utils/logger';
 
 const network = getStacksNetwork();
@@ -52,6 +53,7 @@ export const submitProposal = async (
   description: string,
   category: string,
 ): Promise<unknown> => {
+  requireAuth('submit a proposal');
   logger.info('Submitting governance proposal', { title, category });
 
   return new Promise((resolve, reject) => {
@@ -86,6 +88,7 @@ export const castVote = async (
   proposalId: number,
   inFavor: boolean,
 ): Promise<unknown> => {
+  requireAuth('cast a vote');
   logger.info('Casting vote', { proposalId, inFavor });
 
   return new Promise((resolve, reject) => {
@@ -119,6 +122,7 @@ export const castVote = async (
 export const finalizeProposal = async (
   proposalId: number,
 ): Promise<unknown> => {
+  requireAuth('finalize a proposal');
   logger.info('Finalizing proposal', { proposalId });
 
   return new Promise((resolve, reject) => {

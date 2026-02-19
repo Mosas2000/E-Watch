@@ -569,3 +569,244 @@ textarea:focus-visible {
   height: auto;
   overflow: visible;
 }
+
+/* ========================================
+   Error Boundary & Error State Styles
+   ======================================== */
+
+.error-boundary-fallback {
+  padding: 2rem;
+  margin: 1rem 0;
+  border: 1px solid #e74c3c;
+  border-radius: 8px;
+  background: #fdf2f2;
+  text-align: center;
+}
+
+.error-boundary-fallback h3 {
+  color: #c0392b;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.error-boundary-fallback p {
+  color: #7f1d1d;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.btn-retry {
+  padding: 0.5rem 1.25rem;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.btn-retry:hover {
+  background: #c0392b;
+}
+
+.btn-retry:focus-visible {
+  outline: 2px solid #e74c3c;
+  outline-offset: 2px;
+}
+
+/* --- Section-specific fallbacks --- */
+
+.error-fallback {
+  padding: 1.5rem;
+  margin: 1rem 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.error-fallback h4 {
+  color: #334155;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.error-fallback p {
+  color: #64748b;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+/* --- App-level fatal fallback --- */
+
+.app-error-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+  background: #fefefe;
+}
+
+.app-error-fallback h2 {
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+}
+
+.app-error-fallback p {
+  color: #64748b;
+  max-width: 420px;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+/* --- Inline error message --- */
+
+.error-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.9rem;
+}
+
+.error-message-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.error-message-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.error-message-text {
+  margin: 0;
+  word-break: break-word;
+}
+
+.error-message-dismiss {
+  background: none;
+  border: none;
+  color: #991b1b;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.error-message-dismiss:hover {
+  opacity: 1;
+}
+
+/* --- Network error --- */
+
+.network-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  margin: 1rem 0;
+  border: 1px dashed #94a3b8;
+  border-radius: 8px;
+  background: #f1f5f9;
+  text-align: center;
+}
+
+.network-error-icon {
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+
+.network-error-message {
+  color: #475569;
+  max-width: 360px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* --- Dark theme adjustments --- */
+
+@media (prefers-color-scheme: dark) {
+  .error-boundary-fallback {
+    background: #1c1917;
+    border-color: #7f1d1d;
+  }
+
+  .error-boundary-fallback h3 {
+    color: #fca5a5;
+  }
+
+  .error-boundary-fallback p {
+    color: #fecaca;
+  }
+
+  .error-fallback {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .error-fallback h4 {
+    color: #e2e8f0;
+  }
+
+  .error-fallback p {
+    color: #94a3b8;
+  }
+
+  .app-error-fallback {
+    background: #0f172a;
+  }
+
+  .app-error-fallback h2 {
+    color: #f1f5f9;
+  }
+
+  .app-error-fallback p {
+    color: #94a3b8;
+  }
+
+  .error-message {
+    background: #1c1917;
+    border-color: #7f1d1d;
+    color: #fca5a5;
+  }
+
+  .error-message-dismiss {
+    color: #fca5a5;
+  }
+
+  .network-error {
+    background: #1e293b;
+    border-color: #475569;
+  }
+
+  .network-error-icon {
+    color: #94a3b8;
+  }
+
+  .network-error-message {
+    color: #cbd5e1;
+  }
+}

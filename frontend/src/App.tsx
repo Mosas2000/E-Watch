@@ -10,6 +10,13 @@ import {
   SoftwareSourceCodeSchema,
   WebAppSchema,
 } from './components/StructuredData';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import {
+  WalletFallback,
+  RegistrationFallback,
+  DashboardFallback,
+  AppFallback,
+} from './components/ErrorFallbacks';
 import { usePageSEO } from './hooks/usePageSEO';
 import { PAGE_META, SITE_CONFIG } from './config/seo.config';
 import './App.css';
@@ -46,12 +53,18 @@ function App() {
               <span className="tagline"> — {SITE_CONFIG.tagline}</span>
             </a>
           </h1>
-          <WalletConnect />
+          <ErrorBoundary boundary="wallet" fallback={<WalletFallback />}>
+            <WalletConnect />
+          </ErrorBoundary>
         </header>
 
         <main id="main-content" role="main" aria-label="Primary content">
-          <EventRegistration />
-          <EventDashboard />
+          <ErrorBoundary boundary="registration" fallback={<RegistrationFallback />}>
+            <EventRegistration />
+          </ErrorBoundary>
+          <ErrorBoundary boundary="dashboard" fallback={<DashboardFallback />}>
+            <EventDashboard />
+          </ErrorBoundary>
         </main>
 
         <SEOFooter />

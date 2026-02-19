@@ -30,7 +30,8 @@ function App() {
   });
 
   return (
-    <AppProvider>
+    <ErrorBoundary boundary="app-root" fallback={<AppFallback />}>
+      <AppProvider>
       {/* Structured data for search engine rich results */}
       <OrganizationSchema />
       <WebAppSchema />
@@ -70,6 +71,7 @@ function App() {
         <SEOFooter />
       </div>
     </AppProvider>
+    </ErrorBoundary>
   );
 }
 

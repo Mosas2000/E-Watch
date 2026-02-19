@@ -8,7 +8,7 @@ import {
 } from '@stacks/transactions';
 import { STACKS_MAINNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
-import { userSession } from '../auth';
+import { userSession, isAuthenticated } from '../auth';
 import logger from '../utils/logger';
 import { RequestCache } from '../utils/requestCache';
 import { RateLimiter } from '../utils/rateLimiter';
@@ -211,7 +211,7 @@ export const getEventCount = async () => {
 };
 
 export const updateEvent = async (eventId: number, newData: string) => {
-  if (!userSession.isUserSignedIn()) {
+  if (!isAuthenticated()) {
     logger.warn('Attempted event update without authentication', { eventId });
     throw new Error('User must be signed in to update an event');
   }
@@ -247,7 +247,7 @@ export const updateEvent = async (eventId: number, newData: string) => {
 };
 
 export const deactivateEvent = async (eventId: number) => {
-  if (!userSession.isUserSignedIn()) {
+  if (!isAuthenticated()) {
     logger.warn('Attempted event deactivation without authentication', { eventId });
     throw new Error('User must be signed in to deactivate an event');
   }

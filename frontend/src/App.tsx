@@ -1,6 +1,7 @@
 import { WalletConnect } from './components/WalletConnect';
 import { EventRegistration } from './components/EventRegistration';
 import { EventDashboard } from './components/EventDashboard';
+import { GovernanceDashboard } from './components/GovernanceDashboard';
 import { AppProvider } from './contexts/AppContext';
 import { SkipToContent } from './components/SkipToContent';
 import { SEOFooter } from './components/SEOFooter';
@@ -52,6 +53,7 @@ function App() {
         <main id="main-content" role="main" aria-label="Primary content">
           <EventRegistration />
           <EventDashboard />
+          <GovernanceDashboard />
         </main>
 
         <SEOFooter />

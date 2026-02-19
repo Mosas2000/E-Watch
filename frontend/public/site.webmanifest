@@ -10,7 +10,9 @@
   "scope": "/",
   "lang": "en",
   "dir": "ltr",
-  "categories": ["finance", "utilities", "developer tools"],
+  "categories": ["finance", "utilities", "developer tools", "blockchain"],
+  "iarc_rating_id": "",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/favicon-16x16.png",

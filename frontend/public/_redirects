@@ -1,0 +1,15 @@
+# Redirect rules for canonical URL consistency
+# Prevents duplicate content issues from trailing slashes
+
+# Remove trailing slashes (except root)
+/dashboard/  /dashboard  301
+/register/   /register   301
+/explorer/   /explorer   301
+/docs/       /docs       301
+/faq/        /faq        301
+/about/      /about      301
+/privacy/    /privacy    301
+/terms/      /terms      301
+
+# SPA fallback — serve index.html for all client-side routes
+/*  /index.html  200

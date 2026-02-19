@@ -1,7 +1,7 @@
 # ==============================================
 # E-Watch - Robots.txt Configuration
 # https://ewatch.io/robots.txt
-# Last updated: 2026-02-15
+# Last updated: 2025-06-28
 # ==============================================
 
 # Default rules for all well-behaved crawlers
@@ -78,6 +78,13 @@ Disallow: /api/internal/
 Disallow: /admin/
 Disallow: /_debug/
 Disallow: /*.json$
+Disallow: /assets/*.map$
+
+# Allow search engines to index static assets
+User-agent: *
+Allow: /og-image.png
+Allow: /twitter-image.png
+Allow: /screenshots/
 
 # Sitemap reference
 Sitemap: https://ewatch.io/sitemap.xml

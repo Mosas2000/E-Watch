@@ -14,6 +14,16 @@ interface SEOImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   alt: string;
   /** Optional caption shown below the image */
   caption?: string;
+  /**
+   * Width in pixels. Required for CLS prevention.
+   * The browser reserves layout space before the image loads,
+   * preventing Cumulative Layout Shift penalties.
+   */
+  width: number;
+  /**
+   * Height in pixels. Required for CLS prevention.
+   */
+  height: number;
 }
 
 /**
@@ -26,6 +36,7 @@ interface SEOImageProps extends ImgHTMLAttributes<HTMLImageElement> {
  *     alt="E-Watch event dashboard showing real-time blockchain events"
  *     width={800}
  *     height={450}
+ *     caption="The E-Watch dashboard lets you search and filter events on Stacks."
  *   />
  */
 export const SEOImage = ({

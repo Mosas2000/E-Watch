@@ -1,0 +1,26 @@
+# HTTP Headers for SEO and Security
+# Compatible with Netlify, Vercel (via vercel.json), and Cloudflare Pages
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/sitemap.xml
+  Cache-Control: public, max-age=86400
+
+/robots.txt
+  Cache-Control: public, max-age=86400
+
+/og-image.png
+  Cache-Control: public, max-age=604800
+
+/twitter-image.png
+  Cache-Control: public, max-age=604800

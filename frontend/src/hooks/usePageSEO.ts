@@ -66,6 +66,7 @@ export function usePageSEO({
     upsertMeta('name', 'description', description);
     if (keywords) upsertMeta('name', 'keywords', keywords);
     upsertMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
+    upsertMeta('name', 'author', 'E-Watch Team');
 
     // --- Open Graph ------------------------------------------------------
     const fullUrl = `${SITE_CONFIG.url}${canonical ?? '/'}`;
@@ -82,7 +83,9 @@ export function usePageSEO({
     upsertMeta('name', 'twitter:title', title);
     upsertMeta('name', 'twitter:description', description);
     upsertMeta('name', 'twitter:image', ogImage);
+    upsertMeta('name', 'twitter:image:alt', title);
     upsertMeta('name', 'twitter:creator', SITE_CONFIG.twitterHandle);
+    upsertMeta('name', 'twitter:site', SITE_CONFIG.twitterHandle);
 
     // --- Canonical -------------------------------------------------------
     let link = document.querySelector<HTMLLinkElement>(

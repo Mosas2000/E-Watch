@@ -29,6 +29,8 @@
     <link rel="dns-prefetch" href="https://stacks-node-api.mainnet.stacks.co" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://api.hiro.so" crossorigin />
+    <link rel="dns-prefetch" href="https://api.hiro.so" />
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -44,6 +46,7 @@
     <meta property="og:image" content="https://ewatch.io/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="E-Watch blockchain event monitoring dashboard on Stacks network" />
     <meta property="og:site_name" content="E-Watch" />
     <meta property="og:locale" content="en_US" />
     
@@ -67,39 +70,51 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "E-Watch",
-      "description": "Blockchain event monitoring system for Stacks network",
+      "description": "Blockchain event monitoring system for Stacks network. Register, search, and manage on-chain events with Clarity smart contracts.",
       "url": "https://ewatch.io",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "Web",
+      "browserRequirements": "Requires JavaScript and a modern browser",
+      "softwareVersion": "1.0.0",
+      "releaseNotes": "Initial mainnet release with event registration, dashboard, and wallet integration.",
       "offers": {
         "@type": "Offer",
         "price": "0",
-        "priceCurrency": "USD"
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
       },
       "author": {
         "@type": "Organization",
-        "name": "E-Watch Team"
+        "name": "E-Watch Team",
+        "url": "https://ewatch.io/about"
       },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "150"
-      }
+      "screenshot": "https://ewatch.io/screenshots/dashboard.png",
+      "featureList": "Event registration, Event dashboard, Wallet integration, On-chain storage, Real-time search"
     }
     </script>
   </head>
   <body>
-    <!-- No-JavaScript fallback for SEO crawlers -->
+    <!-- No-JavaScript fallback for SEO crawlers and accessibility -->
     <noscript>
-      <div style="padding: 2rem; text-align: center; font-family: sans-serif;">
-        <h1>E-Watch - Blockchain Event Monitoring</h1>
-        <p>E-Watch requires JavaScript to run. Please enable JavaScript in your browser to use the full application.</p>
-        <p>E-Watch is a blockchain event monitoring platform built on the Stacks network, offering real-time event tracking, registration, and management through smart contracts.</p>
+      <div style="padding: 2rem; text-align: center; font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 800px; margin: 0 auto;">
+        <h1>E-Watch - Blockchain Event Monitoring on Stacks</h1>
+        <p>E-Watch is a decentralized event monitoring platform built on the Stacks blockchain. Register, search, and manage on-chain events using Clarity smart contracts and your Hiro wallet.</p>
+        <h2>Features</h2>
+        <ul style="list-style: none; padding: 0; text-align: left; display: inline-block;">
+          <li>Register events with custom types and data payloads (up to 500 characters)</li>
+          <li>Search events by ID with active/inactive status filtering</li>
+          <li>View event owner address, timestamp, and transaction details</li>
+          <li>Connect your Hiro wallet for on-chain interactions</li>
+          <li>Open-source Clarity smart contract on Stacks mainnet</li>
+        </ul>
+        <p>JavaScript is required to use the interactive application. Please enable JavaScript in your browser settings.</p>
         <nav>
+          <h3>Quick Links</h3>
           <ul>
-            <li><a href="https://ewatch.io/docs">Documentation</a></li>
+            <li><a href="https://ewatch.io/docs">Developer Documentation</a></li>
+            <li><a href="https://ewatch.io/faq">Frequently Asked Questions</a></li>
             <li><a href="https://ewatch.io/about">About E-Watch</a></li>
-            <li><a href="https://ewatch.io/faq">FAQ</a></li>
+            <li><a href="https://github.com/ewatch/E-Watch">Source Code on GitHub</a></li>
           </ul>
         </nav>
       </div>

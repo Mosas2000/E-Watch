@@ -70,7 +70,9 @@ export const EventDashboard = () => {
     <section className="event-dashboard" aria-labelledby="dashboard-heading">
       <h2 id="dashboard-heading">Event Dashboard</h2>
       <p className="section-description">
-        Browse and search blockchain events stored on the Stacks network. View event details, status, and transaction history.
+        Search blockchain events registered on the Stacks mainnet by their numeric ID. Filter results by active or inactive
+        status to find specific on-chain records. Each event includes the registrant address, event type, timestamp, and
+        stored data payload.
       </p>
       
       <div className="dashboard-stats" role="region" aria-label="Dashboard statistics">
@@ -120,9 +122,14 @@ export const EventDashboard = () => {
         </select>
       </div>
 
-      <div className="events-list" role="region" aria-label="Event results">
+      <div className="events-list" role="region" aria-label="Event results" aria-live="polite">
         <h3 className="sr-only">Event Results</h3>
-        {filteredEvents.length === 0 ? (
+        {loading && (
+          <p className="loading-indicator" role="status" aria-live="assertive">
+            Searching for event...
+          </p>
+        )}
+        {!loading && filteredEvents.length === 0 ? (
           <p className="no-results" role="status">
             No events to display. Try searching for an event ID or adjust your filters.
           </p>

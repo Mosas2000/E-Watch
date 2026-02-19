@@ -30,10 +30,10 @@ export const SEOFooter = () => {
           <nav className="footer-section" aria-label="Product navigation">
             <h3>Product</h3>
             <ul>
-              <li><a href="/dashboard">Event Dashboard</a></li>
-              <li><a href="/register">Register Event</a></li>
-              <li><a href="/explorer">Event Explorer</a></li>
-              <li><a href="/getting-started">Getting Started</a></li>
+              <li><a href="/dashboard" title="Search and browse blockchain events">Event Dashboard</a></li>
+              <li><a href="/register" title="Submit a new event to the Stacks blockchain">Register Event</a></li>
+              <li><a href="/explorer" title="Explore all registered on-chain events">Event Explorer</a></li>
+              <li><a href="/getting-started" title="Setup guide for new users">Getting Started</a></li>
             </ul>
           </nav>
 
@@ -41,10 +41,10 @@ export const SEOFooter = () => {
           <nav className="footer-section" aria-label="Resources navigation">
             <h3>Resources</h3>
             <ul>
-              <li><a href="/docs">Documentation</a></li>
-              <li><a href="/docs/api">API Reference</a></li>
-              <li><a href="/docs/smart-contracts">Smart Contracts</a></li>
-              <li><a href="/faq">FAQ</a></li>
+              <li><a href="/docs" title="Full developer documentation and guides">Documentation</a></li>
+              <li><a href="/docs/api" title="REST API endpoints and usage">API Reference</a></li>
+              <li><a href="/docs/smart-contracts" title="Clarity contract interface and functions">Smart Contracts</a></li>
+              <li><a href="/faq" title="Common questions about E-Watch">FAQ</a></li>
             </ul>
           </nav>
 

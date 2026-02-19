@@ -24,51 +24,51 @@ export const SITE_CONFIG = {
  */
 export const PAGE_META = {
   home: {
-    title: 'E-Watch – Blockchain Event Monitoring on Stacks',
+    title: 'E-Watch | Stacks Blockchain Event Monitor',
     description:
-      'Monitor, register, and manage blockchain events on the Stacks network. Real-time dashboards, smart-contract integration, and secure wallet connectivity.',
+      'Track, register, and manage blockchain events on Stacks. Real-time dashboards with smart contract integration and Hiro wallet support.',
     keywords:
-      'blockchain event monitoring, stacks network, smart contracts, clarity, web3 dapp, on-chain events, decentralized',
+      'blockchain event monitoring, stacks network, smart contracts, clarity, web3 dapp, on-chain events, decentralized, hiro wallet',
     canonical: '/',
   },
   dashboard: {
-    title: 'Event Dashboard – E-Watch',
+    title: 'Event Dashboard | E-Watch',
     description:
-      'Browse and search blockchain events stored on the Stacks network. Filter by status, view transaction history, and export event data.',
+      'Search blockchain events on Stacks by ID or status. View owner details, timestamps, and transaction data in a filterable dashboard.',
     keywords:
-      'blockchain dashboard, event search, stacks explorer, on-chain data, event filter',
+      'blockchain dashboard, event search, stacks explorer, on-chain data, event filter, transaction history',
     canonical: '/dashboard',
   },
   register: {
-    title: 'Register Event – E-Watch',
+    title: 'Register Event | E-Watch',
     description:
-      'Submit new events to the Stacks blockchain for permanent, immutable storage and real-time tracking through the E-Watch platform.',
+      'Submit events to the Stacks blockchain for permanent on-chain storage. Supports custom event types and JSON payloads up to 500 bytes.',
     keywords:
-      'register blockchain event, stacks transaction, on-chain registration, smart contract call',
+      'register blockchain event, stacks transaction, on-chain registration, smart contract call, clarity contract',
     canonical: '/register',
   },
   docs: {
-    title: 'Documentation – E-Watch',
+    title: 'Developer Docs | E-Watch',
     description:
-      'Complete developer documentation for E-Watch. Learn how to integrate with the Stacks blockchain, use the smart contract API, and build custom event monitors.',
+      'API reference, Clarity contract docs, and integration guides for E-Watch. Build custom monitors on the Stacks blockchain.',
     keywords:
-      'ewatch docs, blockchain documentation, stacks developer guide, clarity smart contracts',
+      'ewatch docs, blockchain documentation, stacks developer guide, clarity smart contracts, api reference',
     canonical: '/docs',
   },
   faq: {
-    title: 'Frequently Asked Questions – E-Watch',
+    title: 'FAQ | E-Watch',
     description:
-      'Answers to common questions about E-Watch blockchain event monitoring, wallet setup, event registration, and Stacks network integration.',
+      'Common questions about E-Watch event monitoring, Hiro wallet setup, on-chain registration costs, and Stacks network compatibility.',
     keywords:
-      'ewatch faq, blockchain questions, stacks help, event monitoring support',
+      'ewatch faq, blockchain questions, stacks help, event monitoring support, wallet setup',
     canonical: '/faq',
   },
   about: {
-    title: 'About – E-Watch',
+    title: 'About | E-Watch',
     description:
-      'Learn about E-Watch, the open-source blockchain event monitoring platform built on Stacks. Our mission, team, and roadmap.',
+      'E-Watch is an open-source blockchain event monitor built on Stacks. Learn about the project mission, team, and development roadmap.',
     keywords:
-      'about ewatch, blockchain team, stacks project, open source monitoring',
+      'about ewatch, blockchain team, stacks project, open source monitoring, roadmap',
     canonical: '/about',
   },
 } as const;
@@ -161,6 +161,30 @@ export const SCHEMA_ORG = {
         acceptedAnswer: {
           '@type': 'Answer',
           text: 'E-Watch is built on the Stacks blockchain, which settles on Bitcoin. It uses Clarity smart contracts for event management.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What data can I store in an event?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Each event has a type field (up to 50 characters) and a data field (up to 500 characters). You can store JSON, plain text, or any string payload that fits within the size limits.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I update or deactivate an event after registration?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. The event owner can update the data field or deactivate an event through the smart contract. Only the original registrant wallet address has permission to modify their events.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'How do I search for an event?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Use the Event Dashboard to search by numeric event ID. You can also filter results by active or inactive status to narrow down your search.',
         },
       },
     ],

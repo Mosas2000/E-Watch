@@ -61,27 +61,68 @@ export const registerEvent = async (eventType: string, data: string) => {
 };
 
 export const getEvent = async (eventId: number) => {
+  const cacheKey = `event:${eventId}`;
+
+  // Return cached result if available
+  const cached = eventCache.get(cacheKey);
+  if (cached) {
+    logger.debug('Event cache hit', { eventId });
+    return cached;
+  }
+
+  // Check rate limit before making the network call
+  if (!readLimiter.tryAcquire()) {
+    const retryAfter = readLimiter.getRetryAfterMs();
+    logger.warn('Rate limit exceeded for event read', {
+      eventId,
+      retryAfterMs: retryAfter,
+      remaining: readLimiter.remaining,
+    });
+    throw new Error(
+      `Rate limit exceeded. Please wait ${Math.ceil(retryAfter / 1000)} seconds before trying again.`,
+    );
+  }
+
   logger.debug('Fetching event from contract', {
     eventId,
     contractAddress,
   });
 
   try {
-    const result = await fetchCallReadOnlyFunction({
-      contractAddress,
-      contractName,
-      functionName: 'get-event',
-      functionArgs: [uintCV(eventId)],
-      network,
-      senderAddress: contractAddress,
-    });
+    const data = await retryWithBackoff(
+      async () => {
+        const result = await fetchCallReadOnlyFunction({
+          contractAddress,
+          contractName,
+          functionName: 'get-event',
+          functionArgs: [uintCV(eventId)],
+          network,
+          senderAddress: contractAddress,
+        });
+        return cvToJSON(result);
+      },
+      {
+        maxRetries: 2,
+        baseDelayMs: 1000,
+        onRetry: (attempt, error, delayMs) => {
+          logger.warn('Retrying event fetch', {
+            eventId,
+            attempt,
+            error: error.message,
+            delayMs,
+          });
+        },
+      },
+    );
 
-    const data = cvToJSON(result);
     logger.info('Event retrieved successfully', {
       eventId,
       found: !!data.value,
     });
-    
+
+    // Cache the successful result
+    eventCache.set(cacheKey, data);
+
     return data;
   } catch (error: any) {
     logger.error('Failed to fetch event', {

@@ -39,6 +39,22 @@ export const invalidateCache = () => {
 };
 
 export const registerEvent = async (eventType: string, data: string) => {
+  if (!eventType || eventType.trim().length === 0) {
+    throw new Error('eventType must not be empty');
+  }
+
+  if (eventType.length > 128) {
+    throw new Error('eventType exceeds maximum length of 128 characters');
+  }
+
+  if (!data || data.trim().length === 0) {
+    throw new Error('data must not be empty');
+  }
+
+  if (data.length > 256) {
+    throw new Error('data exceeds maximum length of 256 characters');
+  }
+
   logger.info('Initiating event registration', {
     eventType,
     dataLength: data.length,

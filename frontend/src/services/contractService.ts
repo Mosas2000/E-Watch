@@ -214,8 +214,14 @@ export const getEventCount = async () => {
 
 export const updateEvent = async (eventId: number, newData: string) => {
   if (!userSession.isUserSignedIn()) {
+    logger.warn('Attempted event update without authentication', { eventId });
     throw new Error('User must be signed in to update an event');
   }
+
+  logger.info('Initiating event update', {
+    eventId,
+    dataLength: newData.length,
+  });
 
   const userData = userSession.loadUserData();
   
@@ -230,8 +236,16 @@ export const updateEvent = async (eventId: number, newData: string) => {
     postConditionMode: PostConditionMode.Allow,
   };
 
-  const transaction = await makeContractCall(txOptions);
-  return broadcastTransaction({ transaction, network });
+  try {
+    const transaction = await makeContractCall(txOptions);
+    const result = await broadcastTransaction({ transaction, network });
+    logger.transaction('Event update broadcast', { eventId, txid: result.txid });
+    invalidateCache();
+    return result;
+  } catch (error: any) {
+    logger.error('Event update failed', { eventId, error: error.message });
+    throw error;
+  }
 };
 
 export const deactivateEvent = async (eventId: number) => {

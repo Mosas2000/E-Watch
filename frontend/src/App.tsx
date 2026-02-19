@@ -7,6 +7,7 @@ import { SEOFooter } from './components/SEOFooter';
 import {
   BreadcrumbSchema,
   OrganizationSchema,
+  SoftwareSourceCodeSchema,
   WebAppSchema,
 } from './components/StructuredData';
 import { usePageSEO } from './hooks/usePageSEO';
@@ -26,6 +27,7 @@ function App() {
       {/* Structured data for search engine rich results */}
       <OrganizationSchema />
       <WebAppSchema />
+      <SoftwareSourceCodeSchema />
       <BreadcrumbSchema
         items={[
           { name: 'Home', path: '/' },

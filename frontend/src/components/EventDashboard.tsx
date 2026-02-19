@@ -45,6 +45,7 @@ export const EventDashboard = () => {
     if (!searchId) return;
 
     setLoading(true);
+    setRateLimitMessage('');
     try {
       const result = await getEvent(Number(searchId));
       if (result?.value) {
@@ -60,9 +61,13 @@ export const EventDashboard = () => {
         setEvents([]);
         alert('Event not found');
       }
-    } catch (error) {
-      console.error('Fetch failed:', error);
-      alert('Failed to fetch event');
+    } catch (error: any) {
+      if (error.message?.includes('Rate limit')) {
+        setRateLimitMessage(error.message);
+      } else {
+        console.error('Fetch failed:', error);
+        alert('Failed to fetch event');
+      }
     } finally {
       setLoading(false);
     }

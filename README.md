@@ -92,3 +92,9 @@ For detailed information about E2E test structure, fixtures, and best practices,
 - Query events by ID
 - Owner-based access control
 - Event deactivation capability
+- React error boundaries with section-specific fallback UIs
+- Centralized error reporting with in-memory buffer
+- Toast notification system for non-fatal errors
+- Global handlers for uncaught errors and unhandled rejections
+
+For detailed error handling documentation, see [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md).

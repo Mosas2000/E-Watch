@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getEvent, getEventCount } from '../services/contractService';
+import { debounce } from '../utils/debounce';
+import { throttle } from '../utils/throttle';
 
 interface Event {
   owner: string;
@@ -15,25 +17,35 @@ export const EventDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [totalEvents, setTotalEvents] = useState(0);
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [rateLimitMessage, setRateLimitMessage] = useState('');
+
+  // Throttle the event count load so rapid re-mounts do not spam the API
+  const throttledLoadCount = useRef(
+    throttle(async () => {
+      try {
+        const count = await getEventCount();
+        setTotalEvents(count.value?.value || 0);
+      } catch (error: any) {
+        if (error.message?.includes('Rate limit')) {
+          setRateLimitMessage(error.message);
+        } else {
+          console.error('Failed to load event count:', error);
+        }
+        setTotalEvents(0);
+      }
+    }, 5000),
+  ).current;
 
   useEffect(() => {
-    loadEventCount();
+    throttledLoadCount();
+    return () => throttledLoadCount.cancel();
   }, []);
-
-  const loadEventCount = async () => {
-    try {
-      const count = await getEventCount();
-      setTotalEvents(count.value?.value || 0);
-    } catch (error) {
-      console.error('Failed to load event count:', error);
-      setTotalEvents(0);
-    }
-  };
 
   const fetchEvent = async () => {
     if (!searchId) return;
 
     setLoading(true);
+    setRateLimitMessage('');
     try {
       const result = await getEvent(Number(searchId));
       if (result?.value) {
@@ -49,9 +61,13 @@ export const EventDashboard = () => {
         setEvents([]);
         alert('Event not found');
       }
-    } catch (error) {
-      console.error('Fetch failed:', error);
-      alert('Failed to fetch event');
+    } catch (error: any) {
+      if (error.message?.includes('Rate limit')) {
+        setRateLimitMessage(error.message);
+      } else {
+        console.error('Fetch failed:', error);
+        alert('Failed to fetch event');
+      }
     } finally {
       setLoading(false);
     }
@@ -81,6 +97,12 @@ export const EventDashboard = () => {
           <span className="stat-value" aria-label={`${totalEvents} total events`}>{totalEvents}</span>
         </p>
       </div>
+
+      {rateLimitMessage && (
+        <div className="warning" role="alert" aria-live="assertive">
+          {rateLimitMessage}
+        </div>
+      )}
 
       <div className="search-section" role="search" aria-label="Event search">
         <h3 className="sr-only">Search Events</h3>

@@ -216,6 +216,18 @@ export const updateEvent = async (eventId: number, newData: string) => {
     throw new Error('User must be signed in to update an event');
   }
 
+  if (!Number.isInteger(eventId) || eventId < 1) {
+    throw new Error('eventId must be a positive integer');
+  }
+
+  if (!newData || newData.trim().length === 0) {
+    throw new Error('newData must not be empty');
+  }
+
+  if (newData.length > 256) {
+    throw new Error('newData exceeds maximum length of 256 characters');
+  }
+
   logger.info('Initiating event update', {
     eventId,
     dataLength: newData.length,

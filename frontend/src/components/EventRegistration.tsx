@@ -65,7 +65,9 @@ export const EventRegistration = () => {
     <section className="event-registration" aria-labelledby="registration-heading">
       <h2 id="registration-heading">Register New Blockchain Event</h2>
       <p className="section-description">
-        Submit new events to the Stacks blockchain for permanent, immutable storage and tracking.
+        Write events directly to the Stacks mainnet through the E-Watch Clarity smart contract. Each registration creates
+        a permanent on-chain record tied to your wallet address. Event types are limited to 50 characters and data payloads
+        to 500 characters. A small STX transaction fee applies.
       </p>
       <form onSubmit={handleSubmit} aria-label="Event registration form">
         <div className="form-group">

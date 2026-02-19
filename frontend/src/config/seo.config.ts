@@ -163,6 +163,30 @@ export const SCHEMA_ORG = {
           text: 'E-Watch is built on the Stacks blockchain, which settles on Bitcoin. It uses Clarity smart contracts for event management.',
         },
       },
+      {
+        '@type': 'Question',
+        name: 'What data can I store in an event?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Each event has a type field (up to 50 characters) and a data field (up to 500 characters). You can store JSON, plain text, or any string payload that fits within the size limits.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I update or deactivate an event after registration?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. The event owner can update the data field or deactivate an event through the smart contract. Only the original registrant wallet address has permission to modify their events.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'How do I search for an event?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Use the Event Dashboard to search by numeric event ID. You can also filter results by active or inactive status to narrow down your search.',
+        },
+      },
     ],
   },
 } as const;

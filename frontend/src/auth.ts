@@ -30,3 +30,16 @@ export function getUserAddress(): string | null {
     return null;
   }
 }
+
+/**
+ * Guard that throws when no authenticated session exists.
+ * Intended for use at the top of write-operation functions
+ * so auth failures are reported with a consistent message.
+ *
+ * @param action - Human-readable label for the attempted operation
+ */
+export function requireAuth(action: string): void {
+  if (!isAuthenticated()) {
+    throw new Error(`User must be signed in to ${action}`);
+  }
+}

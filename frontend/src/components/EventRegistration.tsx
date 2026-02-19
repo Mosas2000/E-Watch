@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { registerEvent } from '../services/contractService';
+import { useState, useRef } from 'react';
+import { registerEvent, invalidateCache } from '../services/contractService';
 import { useApp } from '../contexts/AppContext';
 
 export const EventRegistration = () => {
@@ -9,6 +9,8 @@ export const EventRegistration = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const lastSubmitTime = useRef(0);
+  const SUBMIT_COOLDOWN_MS = 10_000; // 10 second cooldown between submissions
 
   const validateForm = () => {
     if (!eventType || eventType.length === 0) {
@@ -39,12 +41,24 @@ export const EventRegistration = () => {
       return;
     }
 
+    // Enforce cooldown between submissions to prevent accidental double-sends
+    const now = Date.now();
+    const elapsed = now - lastSubmitTime.current;
+    if (elapsed < SUBMIT_COOLDOWN_MS) {
+      const waitSec = Math.ceil((SUBMIT_COOLDOWN_MS - elapsed) / 1000);
+      setError(`Please wait ${waitSec} seconds before submitting again.`);
+      return;
+    }
+
     setLoading(true);
+    lastSubmitTime.current = Date.now();
     try {
       const response = await registerEvent(eventType, data);
       setSuccess(`Event registered successfully. Transaction ID: ${response.txid}`);
       setEventType('');
       setData('');
+      // Invalidate caches so the dashboard shows the new event
+      invalidateCache();
     } catch (err: any) {
       setError(`Registration failed: ${err.message}`);
     } finally {

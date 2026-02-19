@@ -134,25 +134,63 @@ export const getEvent = async (eventId: number) => {
 };
 
 export const getEventCount = async () => {
+  const cacheKey = 'event-count';
+
+  // Return cached count if available
+  const cached = countCache.get(cacheKey);
+  if (cached) {
+    logger.debug('Event count cache hit');
+    return cached;
+  }
+
+  // Check rate limit
+  if (!readLimiter.tryAcquire()) {
+    const retryAfter = readLimiter.getRetryAfterMs();
+    logger.warn('Rate limit exceeded for event count', {
+      retryAfterMs: retryAfter,
+    });
+    throw new Error(
+      `Rate limit exceeded. Please wait ${Math.ceil(retryAfter / 1000)} seconds.`,
+    );
+  }
+
   logger.debug('Fetching event count from contract', {
     contractAddress,
   });
 
   try {
-    const result = await fetchCallReadOnlyFunction({
-      contractAddress,
-      contractName,
-      functionName: 'get-event-count',
-      functionArgs: [],
-      network,
-      senderAddress: contractAddress,
-    });
+    const data = await retryWithBackoff(
+      async () => {
+        const result = await fetchCallReadOnlyFunction({
+          contractAddress,
+          contractName,
+          functionName: 'get-event-count',
+          functionArgs: [],
+          network,
+          senderAddress: contractAddress,
+        });
+        return cvToJSON(result);
+      },
+      {
+        maxRetries: 2,
+        baseDelayMs: 800,
+        onRetry: (attempt, error, delayMs) => {
+          logger.warn('Retrying event count fetch', {
+            attempt,
+            error: error.message,
+            delayMs,
+          });
+        },
+      },
+    );
 
-    const data = cvToJSON(result);
     logger.info('Event count retrieved', {
       count: data.value?.value,
     });
-    
+
+    // Cache the result
+    countCache.set(cacheKey, data);
+
     return data;
   } catch (error: any) {
     logger.error('Failed to fetch event count', {

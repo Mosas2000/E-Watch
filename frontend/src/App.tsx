@@ -33,6 +33,7 @@ function App() {
         items={[
           { name: 'Home', path: '/' },
           { name: 'Dashboard', path: '/dashboard' },
+          { name: 'Governance', path: '/governance' },
         ]}
       />
 

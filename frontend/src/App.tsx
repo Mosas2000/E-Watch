@@ -46,6 +46,7 @@ function App() {
           { name: 'Home', path: '/' },
           { name: 'Dashboard', path: '/dashboard' },
           { name: 'Governance', path: '/governance' },
+          { name: 'Status', path: '/status' },
         ]}
       />
 

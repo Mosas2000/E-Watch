@@ -71,6 +71,14 @@ export const PAGE_META = {
       'about ewatch, blockchain team, stacks project, open source monitoring, roadmap',
     canonical: '/about',
   },
+  governance: {
+    title: 'Community Governance | E-Watch',
+    description:
+      'Propose features and vote on the direction of E-Watch. On-chain governance powered by a Clarity smart contract on the Stacks network.',
+    keywords:
+      'governance voting, community proposals, stacks dao, on-chain governance, feature voting, decentralized governance',
+    canonical: '/governance',
+  },
 } as const;
 
 /**

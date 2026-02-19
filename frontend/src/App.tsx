@@ -11,6 +11,15 @@ import {
   SoftwareSourceCodeSchema,
   WebAppSchema,
 } from './components/StructuredData';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import {
+  WalletFallback,
+  RegistrationFallback,
+  DashboardFallback,
+  AppFallback,
+} from './components/ErrorFallbacks';
+import { ErrorToast } from './components/ErrorToast';
+import { ErrorProvider } from './contexts/ErrorContext';
 import { usePageSEO } from './hooks/usePageSEO';
 import { PAGE_META, SITE_CONFIG } from './config/seo.config';
 import './App.css';
@@ -24,7 +33,9 @@ function App() {
   });
 
   return (
-    <AppProvider>
+    <ErrorBoundary boundary="app-root" fallback={<AppFallback />}>
+      <AppProvider>
+        <ErrorProvider>
       {/* Structured data for search engine rich results */}
       <OrganizationSchema />
       <WebAppSchema />
@@ -48,18 +59,30 @@ function App() {
               <span className="tagline"> — {SITE_CONFIG.tagline}</span>
             </a>
           </h1>
-          <WalletConnect />
+          <ErrorBoundary boundary="wallet" fallback={<WalletFallback />}>
+            <WalletConnect />
+          </ErrorBoundary>
         </header>
 
         <main id="main-content" role="main" aria-label="Primary content">
-          <EventRegistration />
-          <EventDashboard />
-          <GovernanceDashboard />
+          <ErrorBoundary boundary="registration" fallback={<RegistrationFallback />}>
+            <EventRegistration />
+          </ErrorBoundary>
+          <ErrorBoundary boundary="dashboard" fallback={<DashboardFallback />}>
+            <EventDashboard />
+          </ErrorBoundary>
+          <ErrorBoundary boundary="governance" fallback={<DashboardFallback />}>
+            <GovernanceDashboard />
+          </ErrorBoundary>
         </main>
 
         <SEOFooter />
       </div>
-    </AppProvider>
+
+      <ErrorToast />
+        </ErrorProvider>
+      </AppProvider>
+    </ErrorBoundary>
   );
 }
 

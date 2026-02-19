@@ -1,0 +1,61 @@
+name: Dependency Security Report
+description: Report a security issue in a project dependency
+title: "[DEPS] "
+labels: ["security", "dependencies"]
+body:
+  - type: input
+    id: package
+    attributes:
+      label: Affected Package
+      description: Name and version of the vulnerable package
+      placeholder: "e.g., lodash@4.17.20"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Moderate
+        - Low
+    validations:
+      required: true
+
+  - type: input
+    id: advisory
+    attributes:
+      label: Advisory Link
+      description: Link to the CVE or npm advisory
+      placeholder: "https://github.com/advisories/..."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Affected Area
+      options:
+        - Root project
+        - Frontend
+        - Both
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Brief summary of the vulnerability and its impact
+    validations:
+      required: true
+
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Suggested Fix
+      description: Steps to resolve or link to a patched version
+    validations:
+      required: false

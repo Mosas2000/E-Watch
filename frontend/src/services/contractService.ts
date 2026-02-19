@@ -14,10 +14,10 @@ import logger from '../utils/logger';
 import { RequestCache } from '../utils/requestCache';
 import { RateLimiter } from '../utils/rateLimiter';
 import { retryWithBackoff } from '../utils/retryWithBackoff';
+import { getActiveContract } from '../config/contractConfig';
 
 const network = STACKS_MAINNET;
-const contractAddress = 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T';
-const contractName = 'ewatch';
+const { address: contractAddress, name: contractName } = getActiveContract();
 
 // Cache event lookups for 30 seconds to avoid duplicate reads
 const eventCache = new RequestCache<unknown>(30_000, 200);

@@ -7,3 +7,4 @@ mnemonic = "your twelve or twenty-four word seed phrase goes here"
 
 [contracts]
 ewatch = "contracts/ewatch.clar"
+ewatch-v2 = "contracts/ewatch-v2.clar"

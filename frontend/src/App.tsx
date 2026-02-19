@@ -17,6 +17,8 @@ import {
   DashboardFallback,
   AppFallback,
 } from './components/ErrorFallbacks';
+import { ErrorToast } from './components/ErrorToast';
+import { ErrorProvider } from './contexts/ErrorContext';
 import { usePageSEO } from './hooks/usePageSEO';
 import { PAGE_META, SITE_CONFIG } from './config/seo.config';
 import './App.css';
@@ -32,6 +34,7 @@ function App() {
   return (
     <ErrorBoundary boundary="app-root" fallback={<AppFallback />}>
       <AppProvider>
+        <ErrorProvider>
       {/* Structured data for search engine rich results */}
       <OrganizationSchema />
       <WebAppSchema />
@@ -70,7 +73,10 @@ function App() {
 
         <SEOFooter />
       </div>
-    </AppProvider>
+
+      <ErrorToast />
+        </ErrorProvider>
+      </AppProvider>
     </ErrorBoundary>
   );
 }

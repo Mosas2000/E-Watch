@@ -250,8 +250,11 @@ export const updateEvent = async (eventId: number, newData: string) => {
 
 export const deactivateEvent = async (eventId: number) => {
   if (!userSession.isUserSignedIn()) {
+    logger.warn('Attempted event deactivation without authentication', { eventId });
     throw new Error('User must be signed in to deactivate an event');
   }
+
+  logger.info('Initiating event deactivation', { eventId });
 
   const userData = userSession.loadUserData();
   
@@ -266,6 +269,14 @@ export const deactivateEvent = async (eventId: number) => {
     postConditionMode: PostConditionMode.Allow,
   };
 
-  const transaction = await makeContractCall(txOptions);
-  return broadcastTransaction({ transaction, network });
+  try {
+    const transaction = await makeContractCall(txOptions);
+    const result = await broadcastTransaction({ transaction, network });
+    logger.transaction('Event deactivation broadcast', { eventId, txid: result.txid });
+    invalidateCache();
+    return result;
+  } catch (error: any) {
+    logger.error('Event deactivation failed', { eventId, error: error.message });
+    throw error;
+  }
 };

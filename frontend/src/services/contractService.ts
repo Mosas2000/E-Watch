@@ -256,27 +256,27 @@ export const deactivateEvent = async (eventId: number) => {
 
   logger.info('Initiating event deactivation', { eventId });
 
-  const userData = userSession.loadUserData();
-  
-  const txOptions = {
-    contractAddress,
-    contractName,
-    functionName: 'deactivate-event',
-    functionArgs: [uintCV(eventId)],
-    senderKey: userData.appPrivateKey,
-    network,
-    anchorMode: AnchorMode.Any,
-    postConditionMode: PostConditionMode.Allow,
-  };
-
-  try {
-    const transaction = await makeContractCall(txOptions);
-    const result = await broadcastTransaction({ transaction, network });
-    logger.transaction('Event deactivation broadcast', { eventId, txid: result.txid });
-    invalidateCache();
-    return result;
-  } catch (error: any) {
-    logger.error('Event deactivation failed', { eventId, error: error.message });
-    throw error;
-  }
+  return new Promise((resolve, reject) => {
+    openContractCall({
+      contractAddress,
+      contractName,
+      functionName: 'deactivate-event',
+      functionArgs: [uintCV(eventId)],
+      network,
+      anchorMode: AnchorMode.Any,
+      postConditionMode: PostConditionMode.Allow,
+      onFinish: (data) => {
+        logger.transaction('Event deactivation completed', {
+          eventId,
+          txid: data.txId,
+        });
+        invalidateCache();
+        resolve(data);
+      },
+      onCancel: () => {
+        logger.warn('Event deactivation cancelled by user', { eventId });
+        reject(new Error('Transaction cancelled by user'));
+      },
+    });
+  });
 };

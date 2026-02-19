@@ -100,4 +100,15 @@ For detailed information about E2E test structure, fixtures, and best practices,
 - Toast notification system for non-fatal errors
 - Global handlers for uncaught errors and unhandled rejections
 
+## Authentication
+
+All write operations (register, update, deactivate) require an active Stacks wallet session. The auth module (`frontend/src/auth.ts`) provides:
+
+- `userSession` - Stacks UserSession instance configured with `store_write` and `publish_data` permissions
+- `isAuthenticated()` - Check whether a wallet session is active
+- `getUserAddress()` - Retrieve the signed-in user's STX address
+- `requireAuth(action)` - Guard that throws with a descriptive message when not signed in
+
+The contract service uses `requireAuth()` at the top of every write function to ensure consistent error handling before any contract interaction begins.
+
 For detailed error handling documentation, see [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md).

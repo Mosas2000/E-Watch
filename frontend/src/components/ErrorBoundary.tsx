@@ -1,11 +1,12 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
+import { reportError } from '../services/errorReportingService';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   /** Label used in logs to identify which boundary caught the error */
-  name?: string;
+  boundary?: string;
 }
 
 interface ErrorBoundaryState {
@@ -29,9 +30,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    const label = this.props.name || 'ErrorBoundary';
-    console.error(`[${label}] Component error:`, error);
-    console.error(`[${label}] Component stack:`, errorInfo.componentStack);
+    const label = this.props.boundary || 'unknown';
+
+    // Send to centralized error reporting
+    reportError(error, errorInfo.componentStack || undefined, label);
 
     if (this.props.onError) {
       this.props.onError(error, errorInfo);

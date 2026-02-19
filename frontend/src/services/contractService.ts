@@ -235,6 +235,10 @@ export const updateEvent = async (eventId: number, newData: string) => {
 };
 
 export const deactivateEvent = async (eventId: number) => {
+  if (!userSession.isUserSignedIn()) {
+    throw new Error('User must be signed in to deactivate an event');
+  }
+
   const userData = userSession.loadUserData();
   
   const txOptions = {

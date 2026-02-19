@@ -23,9 +23,20 @@ Blockchain event monitoring system for Stacks network.
 - Comprehensive E2E testing with Playwright
 
 ## Setup
+```bash
+cd frontend
+cp .env.example .env.local   # configure your target network
 npm install
-npm run test
-npm run deploy
+```
+
+```bash
+npm run dev           # local dev server (uses .env.local)
+npm run dev:testnet   # dev server targeting testnet
+npm run build         # production build (mainnet)
+npm run build:staging # staging build (testnet)
+```
+
+For full environment variable reference see [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 
 ## Logging
 

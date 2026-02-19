@@ -96,6 +96,12 @@ export const EventDashboard = () => {
         </p>
       </div>
 
+      {rateLimitMessage && (
+        <div className="warning" role="alert" aria-live="assertive">
+          {rateLimitMessage}
+        </div>
+      )}
+
       <div className="search-section" role="search" aria-label="Event search">
         <h3 className="sr-only">Search Events</h3>
         <label htmlFor="event-search" className="sr-only">

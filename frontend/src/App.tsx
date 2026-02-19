@@ -19,6 +19,7 @@ import {
   AppFallback,
 } from './components/ErrorFallbacks';
 import { ErrorToast } from './components/ErrorToast';
+import { NetworkBadge } from './components/NetworkBadge';
 import { ErrorProvider } from './contexts/ErrorContext';
 import { usePageSEO } from './hooks/usePageSEO';
 import { PAGE_META, SITE_CONFIG } from './config/seo.config';
@@ -59,6 +60,7 @@ function App() {
               <span className="tagline"> — {SITE_CONFIG.tagline}</span>
             </a>
           </h1>
+          <NetworkBadge />
           <ErrorBoundary boundary="wallet" fallback={<WalletFallback />}>
             <WalletConnect />
           </ErrorBoundary>

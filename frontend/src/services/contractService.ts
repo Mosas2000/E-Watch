@@ -223,29 +223,29 @@ export const updateEvent = async (eventId: number, newData: string) => {
     dataLength: newData.length,
   });
 
-  const userData = userSession.loadUserData();
-  
-  const txOptions = {
-    contractAddress,
-    contractName,
-    functionName: 'update-event',
-    functionArgs: [uintCV(eventId), stringAsciiCV(newData)],
-    senderKey: userData.appPrivateKey,
-    network,
-    anchorMode: AnchorMode.Any,
-    postConditionMode: PostConditionMode.Allow,
-  };
-
-  try {
-    const transaction = await makeContractCall(txOptions);
-    const result = await broadcastTransaction({ transaction, network });
-    logger.transaction('Event update broadcast', { eventId, txid: result.txid });
-    invalidateCache();
-    return result;
-  } catch (error: any) {
-    logger.error('Event update failed', { eventId, error: error.message });
-    throw error;
-  }
+  return new Promise((resolve, reject) => {
+    openContractCall({
+      contractAddress,
+      contractName,
+      functionName: 'update-event',
+      functionArgs: [uintCV(eventId), stringAsciiCV(newData)],
+      network,
+      anchorMode: AnchorMode.Any,
+      postConditionMode: PostConditionMode.Allow,
+      onFinish: (data) => {
+        logger.transaction('Event update completed', {
+          eventId,
+          txid: data.txId,
+        });
+        invalidateCache();
+        resolve(data);
+      },
+      onCancel: () => {
+        logger.warn('Event update cancelled by user', { eventId });
+        reject(new Error('Transaction cancelled by user'));
+      },
+    });
+  });
 };
 
 export const deactivateEvent = async (eventId: number) => {

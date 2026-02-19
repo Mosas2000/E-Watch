@@ -5,18 +5,24 @@
  * Toggle the active contract version by changing CONTRACT_VERSION.
  * The frontend service layer reads from this module to determine
  * which contract to call.
+ *
+ * Contract address and name can be overridden via environment
+ * variables (VITE_CONTRACT_ADDRESS, VITE_CONTRACT_NAME). When
+ * set, those values take precedence over the defaults below.
  */
+
+import { env } from './env';
 
 export const CONTRACT_VERSION = 1 as const;
 
 export const V1_CONTRACT = {
-  address: "SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T",
-  name: "ewatch",
+  address: env.contractAddress,
+  name: env.contractName,
   version: 1,
 } as const;
 
 export const V2_CONTRACT = {
-  address: "SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T",
+  address: env.contractAddress,
   name: "ewatch-v2",
   version: 2,
 } as const;

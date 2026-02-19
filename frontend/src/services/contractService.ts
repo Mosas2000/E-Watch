@@ -8,15 +8,15 @@ import {
   fetchCallReadOnlyFunction,
   cvToJSON,
 } from '@stacks/transactions';
-import { STACKS_MAINNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
+import { getStacksNetwork } from '../config/networkConfig';
 import logger from '../utils/logger';
 import { RequestCache } from '../utils/requestCache';
 import { RateLimiter } from '../utils/rateLimiter';
 import { retryWithBackoff } from '../utils/retryWithBackoff';
 import { getActiveContract } from '../config/contractConfig';
 
-const network = STACKS_MAINNET;
+const network = getStacksNetwork();
 const { address: contractAddress, name: contractName } = getActiveContract();
 
 // Cache event lookups for 30 seconds to avoid duplicate reads

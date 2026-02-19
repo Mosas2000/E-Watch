@@ -39,6 +39,11 @@ export const invalidateCache = () => {
 };
 
 export const registerEvent = async (eventType: string, data: string) => {
+  if (!isAuthenticated()) {
+    logger.warn('Attempted event registration without authentication');
+    throw new Error('User must be signed in to register an event');
+  }
+
   if (!eventType || eventType.trim().length === 0) {
     throw new Error('eventType must not be empty');
   }

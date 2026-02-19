@@ -213,6 +213,10 @@ export const getEventCount = async () => {
 };
 
 export const updateEvent = async (eventId: number, newData: string) => {
+  if (!userSession.isUserSignedIn()) {
+    throw new Error('User must be signed in to update an event');
+  }
+
   const userData = userSession.loadUserData();
   
   const txOptions = {

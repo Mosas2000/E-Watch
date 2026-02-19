@@ -1,3 +1,14 @@
+// ---------------------------------------------------------------------------
+// Contract Service
+// ---------------------------------------------------------------------------
+// Provides typed wrappers around all smart-contract interactions for the
+// E-Watch application.  Write operations use openContractCall (wallet popup)
+// while read operations use fetchCallReadOnlyFunction (no wallet needed).
+//
+// Authentication: every write function calls requireAuth() before it does
+// anything else so unauthenticated requests fail fast with a clear message.
+// ---------------------------------------------------------------------------
+
 import {
   AnchorMode,
   PostConditionMode,

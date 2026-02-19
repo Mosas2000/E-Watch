@@ -66,6 +66,7 @@ export function usePageSEO({
     upsertMeta('name', 'description', description);
     if (keywords) upsertMeta('name', 'keywords', keywords);
     upsertMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
+    upsertMeta('name', 'author', 'E-Watch Team');
 
     // --- Open Graph ------------------------------------------------------
     const fullUrl = `${SITE_CONFIG.url}${canonical ?? '/'}`;

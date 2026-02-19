@@ -264,6 +264,10 @@ export const deactivateEvent = async (eventId: number) => {
     throw new Error('User must be signed in to deactivate an event');
   }
 
+  if (!Number.isInteger(eventId) || eventId < 1) {
+    throw new Error('eventId must be a positive integer');
+  }
+
   logger.info('Initiating event deactivation', { eventId });
 
   return new Promise((resolve, reject) => {

@@ -1303,3 +1303,35 @@ textarea:focus-visible {
     max-width: none;
   }
 }
+
+/* --- Network Badge --- */
+
+.network-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-left: 0.75rem;
+  vertical-align: middle;
+}
+
+.network-badge--testnet {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.network-badge--mainnet {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.network-badge-env {
+  font-weight: 400;
+  font-size: 0.7rem;
+  opacity: 0.8;
+}

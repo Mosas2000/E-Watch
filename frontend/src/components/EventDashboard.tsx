@@ -122,9 +122,14 @@ export const EventDashboard = () => {
         </select>
       </div>
 
-      <div className="events-list" role="region" aria-label="Event results">
+      <div className="events-list" role="region" aria-label="Event results" aria-live="polite">
         <h3 className="sr-only">Event Results</h3>
-        {filteredEvents.length === 0 ? (
+        {loading && (
+          <p className="loading-indicator" role="status" aria-live="assertive">
+            Searching for event...
+          </p>
+        )}
+        {!loading && filteredEvents.length === 0 ? (
           <p className="no-results" role="status">
             No events to display. Try searching for an event ID or adjust your filters.
           </p>

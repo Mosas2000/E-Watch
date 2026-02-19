@@ -1,0 +1,7 @@
+# E-Watch Security Contact
+# https://securitytxt.org/
+
+Contact: mailto:security@ewatch.io
+Preferred-Languages: en
+Canonical: https://ewatch.io/.well-known/security.txt
+Expires: 2026-06-28T00:00:00.000Z

@@ -427,6 +427,20 @@ input:focus, textarea:focus, select:focus {
   font-style: italic;
 }
 
+/* Loading indicator for search in progress */
+.loading-indicator {
+  text-align: center;
+  padding: 20px;
+  color: #5546ff;
+  font-weight: 500;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 /* Event Details as Definition List */
 .event-details {
   margin-top: 15px;

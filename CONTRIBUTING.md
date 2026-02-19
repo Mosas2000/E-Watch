@@ -22,6 +22,14 @@ Before submitting:
 - Test manually with testnet
 - Verify build succeeds
 
+## Dependency Management
+
+- Install project git hooks after cloning: `npm run hooks:install`
+- Run `npm run audit:all` before adding new dependencies
+- Pin exact versions (enforced by `.npmrc`)
+- Check `docs/DEPENDENCY_POLICY.md` for update schedules and severity response times
+- Never commit a lock file that introduces high-severity vulnerabilities
+
 ## Questions
 
 Open an issue for any questions or concerns.

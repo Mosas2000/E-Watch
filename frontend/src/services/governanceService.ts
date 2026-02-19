@@ -9,6 +9,7 @@ import {
 import { STACKS_MAINNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
 import { AnchorMode, PostConditionMode } from '@stacks/transactions';
+import { requireAuth } from '../auth';
 import logger from '../utils/logger';
 
 const network = STACKS_MAINNET;

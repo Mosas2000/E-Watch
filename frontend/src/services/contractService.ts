@@ -87,6 +87,10 @@ export const registerEvent = async (eventType: string, data: string) => {
 };
 
 export const getEvent = async (eventId: number) => {
+  if (!Number.isInteger(eventId) || eventId < 1) {
+    throw new Error('eventId must be a positive integer');
+  }
+
   const cacheKey = `event:${eventId}`;
 
   // Return cached result if available

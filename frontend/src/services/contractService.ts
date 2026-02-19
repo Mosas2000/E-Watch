@@ -38,6 +38,15 @@ export const invalidateCache = () => {
   logger.debug('All contract caches invalidated');
 };
 
+/**
+ * Register a new event on the smart contract.
+ * Opens the Stacks wallet for the user to sign and broadcast the transaction.
+ *
+ * @param eventType - Category label for the event (max 128 ASCII characters)
+ * @param data - Payload string describing the event (max 256 ASCII characters)
+ * @returns Promise resolving with the finished transaction data
+ * @throws If the user is not authenticated, input is invalid, or the user cancels
+ */
 export const registerEvent = async (eventType: string, data: string) => {
   if (!isAuthenticated()) {
     logger.warn('Attempted event registration without authentication');
@@ -91,6 +100,14 @@ export const registerEvent = async (eventType: string, data: string) => {
   });
 };
 
+/**
+ * Fetch a single event from the smart contract by its numeric identifier.
+ * Results are cached for 30 seconds to reduce redundant on-chain reads.
+ *
+ * @param eventId - Positive integer identifying the event
+ * @returns Parsed JSON representation of the Clarity return value
+ * @throws On network failure, rate limiting, or invalid eventId
+ */
 export const getEvent = async (eventId: number) => {
   if (!Number.isInteger(eventId) || eventId < 1) {
     throw new Error('eventId must be a positive integer');
@@ -168,6 +185,13 @@ export const getEvent = async (eventId: number) => {
   }
 };
 
+/**
+ * Retrieve the total number of registered events from the contract.
+ * Results are cached for 15 seconds since the count changes with each registration.
+ *
+ * @returns Parsed JSON representation of the event count
+ * @throws On network failure or rate limiting
+ */
 export const getEventCount = async () => {
   const cacheKey = 'event-count';
 
@@ -235,6 +259,15 @@ export const getEventCount = async () => {
   }
 };
 
+/**
+ * Update the data payload of an existing event on the contract.
+ * Requires an active user session. Opens the wallet for transaction signing.
+ *
+ * @param eventId - Positive integer identifying the event to update
+ * @param newData - Replacement data string (max 256 ASCII characters)
+ * @returns Promise resolving with the finished transaction data
+ * @throws If not authenticated, input is invalid, or the user cancels
+ */
 export const updateEvent = async (eventId: number, newData: string) => {
   if (!isAuthenticated()) {
     logger.warn('Attempted event update without authentication', { eventId });
@@ -283,6 +316,14 @@ export const updateEvent = async (eventId: number, newData: string) => {
   });
 };
 
+/**
+ * Deactivate an event on the contract, marking it as inactive.
+ * Requires an active user session. Opens the wallet for transaction signing.
+ *
+ * @param eventId - Positive integer identifying the event to deactivate
+ * @returns Promise resolving with the finished transaction data
+ * @throws If not authenticated, eventId is invalid, or the user cancels
+ */
 export const deactivateEvent = async (eventId: number) => {
   if (!isAuthenticated()) {
     logger.warn('Attempted event deactivation without authentication', { eventId });

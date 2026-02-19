@@ -13,7 +13,7 @@
 ;;   - get-version for on-chain version identification
 ;;   - ERR-PAUSED (u503) for pause-gated operations
 
-;; ── Data Storage ──────────────────────────────────────────
+;; -- Data Storage --------------------------------------------------
 
 (define-map events
   { event-id: uint }
@@ -31,7 +31,7 @@
 (define-data-var contract-paused bool false)
 (define-data-var admin principal tx-sender)
 
-;; ── Error Constants ───────────────────────────────────────
+;; -- Error Constants -----------------------------------------------
 
 (define-constant ERR-NOT-FOUND (err u404))
 (define-constant ERR-UNAUTHORIZED (err u403))
@@ -39,7 +39,7 @@
 (define-constant ERR-PAUSED (err u503))
 (define-constant ERR-INVALID-VERSION (err u400))
 
-;; ── Admin Functions ───────────────────────────────────────
+;; -- Admin Functions -----------------------------------------------
 
 (define-read-only (get-version)
   (ok (var-get contract-version))
@@ -77,7 +77,7 @@
   )
 )
 
-;; ── Migration Support ─────────────────────────────────────
+;; -- Migration Support ---------------------------------------------
 
 ;; Import a single event from the v1 contract during migration.
 ;; Only callable by the admin to prevent unauthorized data injection.
@@ -120,7 +120,7 @@
   )
 )
 
-;; ── Core Functions (backward compatible) ──────────────────
+;; -- Core Functions (backward compatible) ---------------------------
 
 (define-public (register-event (event-type (string-ascii 50)) (data (string-ascii 500)))
   (begin

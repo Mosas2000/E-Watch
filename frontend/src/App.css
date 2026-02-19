@@ -909,3 +909,56 @@ textarea:focus-visible {
     gap: 4px;
   }
 }
+
+/* ---- Governance History Table ---- */
+
+.governance-history {
+  margin-top: 24px;
+}
+
+.governance-history h3 {
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.history-table th,
+.history-table td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.history-table th {
+  color: #666;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.history-table tr:hover {
+  background: #f9f9fb;
+}
+
+.governance-history-empty {
+  text-align: center;
+  color: #999;
+  padding: 24px;
+}
+
+@media (max-width: 600px) {
+  .history-table {
+    font-size: 12px;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 6px 8px;
+  }
+}

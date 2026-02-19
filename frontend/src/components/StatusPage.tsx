@@ -11,6 +11,7 @@ import { evaluateCompliance } from '../services/slaComplianceService';
 import { aggregateStatus } from '../services/healthCheckService';
 import { formatUptime } from '../utils/uptimeCalculations';
 import { calculateUptimeStats } from '../utils/uptimeCalculations';
+import './StatusPage.css';
 
 const SERVICE_NAMES: Record<string, string> = {
   'stacks-api': 'Stacks Node API',

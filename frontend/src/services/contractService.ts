@@ -8,7 +8,7 @@ import {
 } from '@stacks/transactions';
 import { STACKS_MAINNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
-import { userSession, isAuthenticated, requireAuth } from '../auth';
+import { requireAuth } from '../auth';
 import logger from '../utils/logger';
 import { RequestCache } from '../utils/requestCache';
 import { RateLimiter } from '../utils/rateLimiter';

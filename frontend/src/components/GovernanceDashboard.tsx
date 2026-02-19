@@ -3,6 +3,7 @@ import { useGovernance } from '../hooks/useGovernance';
 import { ProposalForm } from './ProposalForm';
 import { ProposalList } from './ProposalList';
 import { VoterStats } from './VoterStats';
+import { GovernanceHistory } from './GovernanceHistory';
 
 export const GovernanceDashboard = () => {
   const { proposals, voterHistory, loading, error, refresh } = useGovernance();
@@ -67,6 +68,8 @@ export const GovernanceDashboard = () => {
         loading={loading}
         onVoted={refresh}
       />
+
+      <GovernanceHistory proposals={proposals} />
     </section>
   );
 };

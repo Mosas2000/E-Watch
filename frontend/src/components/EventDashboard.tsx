@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getEvent, getEventCount } from '../services/contractService';
+import { debounce } from '../utils/debounce';
+import { throttle } from '../utils/throttle';
 
 interface Event {
   owner: string;
@@ -15,20 +17,29 @@ export const EventDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [totalEvents, setTotalEvents] = useState(0);
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [rateLimitMessage, setRateLimitMessage] = useState('');
+
+  // Throttle the event count load so rapid re-mounts do not spam the API
+  const throttledLoadCount = useRef(
+    throttle(async () => {
+      try {
+        const count = await getEventCount();
+        setTotalEvents(count.value?.value || 0);
+      } catch (error: any) {
+        if (error.message?.includes('Rate limit')) {
+          setRateLimitMessage(error.message);
+        } else {
+          console.error('Failed to load event count:', error);
+        }
+        setTotalEvents(0);
+      }
+    }, 5000),
+  ).current;
 
   useEffect(() => {
-    loadEventCount();
+    throttledLoadCount();
+    return () => throttledLoadCount.cancel();
   }, []);
-
-  const loadEventCount = async () => {
-    try {
-      const count = await getEventCount();
-      setTotalEvents(count.value?.value || 0);
-    } catch (error) {
-      console.error('Failed to load event count:', error);
-      setTotalEvents(0);
-    }
-  };
 
   const fetchEvent = async () => {
     if (!searchId) return;

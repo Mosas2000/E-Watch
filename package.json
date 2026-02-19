@@ -14,7 +14,11 @@
     "register-events": "ts-node scripts/register-events.ts",
     "query": "ts-node scripts/query-events.ts",
     "status": "ts-node scripts/check-status.ts",
-    "build": "cd frontend && npm run build"
+    "build": "cd frontend && npm run build",
+    "audit:all": "npm audit && cd frontend && npm audit",
+    "audit:fix": "npm audit fix && cd frontend && npm audit fix",
+    "deps:check": "npm outdated && cd frontend && npm outdated",
+    "hooks:install": "sh .hooks/install.sh"
   },
   "keywords": [],
   "author": "",

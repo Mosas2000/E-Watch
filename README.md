@@ -2,6 +2,9 @@
 
 Blockchain event monitoring system for Stacks network.
 
+![CI](https://github.com/Mosas2000/E-Watch/actions/workflows/ci.yml/badge.svg)
+![Security Audit](https://github.com/Mosas2000/E-Watch/actions/workflows/security-audit.yml/badge.svg)
+
 ## 🚀 Live on Mainnet
 - **Contract**: `SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T.ewatch`
 - **Network**: Stacks Mainnet

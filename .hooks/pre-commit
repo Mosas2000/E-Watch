@@ -1,0 +1,44 @@
+#!/bin/sh
+#
+# Pre-commit hook: dependency security check
+#
+# Runs npm audit on staged package-lock.json changes to catch
+# newly introduced vulnerabilities before they hit the remote.
+
+# Check if any package-lock files are staged
+LOCK_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E 'package-lock\.json$')
+
+if [ -z "$LOCK_FILES" ]; then
+  exit 0
+fi
+
+echo "Running dependency security check..."
+
+# Audit root if its lock file changed
+if echo "$LOCK_FILES" | grep -q '^package-lock\.json$'; then
+  echo "  Auditing root dependencies..."
+  npm audit --audit-level=high 2>/dev/null
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "Root dependency audit found high-severity issues."
+    echo "Run 'npm audit' for details or 'npm audit fix' to resolve."
+    echo "To bypass this check, use: git commit --no-verify"
+    exit 1
+  fi
+fi
+
+# Audit frontend if its lock file changed
+if echo "$LOCK_FILES" | grep -q '^frontend/package-lock\.json$'; then
+  echo "  Auditing frontend dependencies..."
+  (cd frontend && npm audit --audit-level=high 2>/dev/null)
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "Frontend dependency audit found high-severity issues."
+    echo "Run 'cd frontend && npm audit' for details."
+    echo "To bypass this check, use: git commit --no-verify"
+    exit 1
+  fi
+fi
+
+echo "Dependency check passed."
+exit 0

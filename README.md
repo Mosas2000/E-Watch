@@ -99,5 +99,10 @@ For detailed information about E2E test structure, fixtures, and best practices,
 - Centralized error reporting with in-memory buffer
 - Toast notification system for non-fatal errors
 - Global handlers for uncaught errors and unhandled rejections
+- SLA compliance tracking with configurable targets
+- Automated uptime monitoring with incident detection
+- Status page with per-service health indicators
 
 For detailed error handling documentation, see [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md).
+
+For SLA monitoring documentation, see [docs/SLA_MONITORING.md](docs/SLA_MONITORING.md).

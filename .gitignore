@@ -3,6 +3,7 @@ frontend/node_modules/
 .env
 .env.local
 .env.*.local
+frontend/.env.local
 settings/mainnet.toml
 settings/testnet.toml
 dist

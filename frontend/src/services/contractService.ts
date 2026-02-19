@@ -11,10 +11,22 @@ import {
 import { STACKS_MAINNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
 import logger from '../utils/logger';
+import { RequestCache } from '../utils/requestCache';
+import { RateLimiter } from '../utils/rateLimiter';
+import { retryWithBackoff } from '../utils/retryWithBackoff';
 
 const network = STACKS_MAINNET;
 const contractAddress = 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T';
 const contractName = 'ewatch';
+
+// Cache event lookups for 30 seconds to avoid duplicate reads
+const eventCache = new RequestCache<unknown>(30_000, 200);
+
+// Cache event count for 15 seconds since it changes with each registration
+const countCache = new RequestCache<unknown>(15_000, 1);
+
+// Rate limiter: allow 20 read-only calls per minute
+const readLimiter = new RateLimiter(20, 60_000);
 
 export const registerEvent = async (eventType: string, data: string) => {
   logger.info('Initiating event registration', {

@@ -26,6 +26,11 @@
   }
 )
 
+(define-map events-by-owner
+  { owner: principal }
+  { events: (list 100 uint) }
+)
+
 (define-data-var event-counter uint u0)
 (define-data-var contract-version uint u2)
 (define-data-var contract-paused bool false)
@@ -89,7 +94,10 @@
     (data (string-ascii 500))
     (active bool)
   )
-  (begin
+  (let
+    (
+      (current-events (default-to (list) (get events (map-get? events-by-owner { owner: owner }))))
+    )
     (asserts! (is-eq tx-sender (var-get admin)) ERR-UNAUTHORIZED)
     (asserts! (> (len event-type) u0) ERR-INVALID-INPUT)
     (asserts! (> (len data) u0) ERR-INVALID-INPUT)
@@ -102,6 +110,14 @@
         data: data,
         active: active
       }
+    )
+    ;; Update owner mapping if there's room
+    (if (< (len current-events) u100)
+      (map-set events-by-owner
+        { owner: owner }
+        { events: (unwrap-panic (as-max-len? (append current-events event-id) u100)) }
+      )
+      true
     )
     ;; Update counter if this event-id is beyond current counter
     (if (>= event-id (var-get event-counter))
@@ -132,6 +148,7 @@
     (let
       (
         (event-id (var-get event-counter))
+        (current-events (default-to (list) (get events (map-get? events-by-owner { owner: tx-sender }))))
       )
       (map-set events
         { event-id: event-id }
@@ -143,10 +160,21 @@
           active: true
         }
       )
+      (if (< (len current-events) u100)
+        (map-set events-by-owner
+          { owner: tx-sender }
+          { events: (unwrap-panic (as-max-len? (append current-events event-id) u100)) }
+        )
+        true
+      )
       (var-set event-counter (+ event-id u1))
       (ok event-id)
     )
   )
+)
+
+(define-read-only (get-events-by-owner (owner principal))
+  (default-to (list) (get events (map-get? events-by-owner { owner: owner })))
 )
 
 (define-read-only (get-event (event-id uint))

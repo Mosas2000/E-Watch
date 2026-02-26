@@ -117,6 +117,38 @@ describe('E-Watch v1 Contract', () => {
     });
   });
 
+  describe('get-events-by-owner', () => {
+    it('should return a list of event IDs registered by the owner', () => {
+      simnet.callPublicFn('ewatch', 'register-event', [Cl.stringAscii('mint'), Cl.stringAscii('first data')], wallet1);
+      simnet.callPublicFn('ewatch', 'register-event', [Cl.stringAscii('transfer'), Cl.stringAscii('second data')], wallet1);
+
+      const result = simnet.callReadOnlyFn(
+        'ewatch',
+        'get-events-by-owner',
+        [Cl.standardPrincipal(wallet1)],
+        wallet1
+      );
+      const json = cvToJSON(result.result);
+      expect(json.value).toBeDefined();
+      expect(json.value.length).toBe(2);
+      expect(json.value[0].value).toBe("0");
+      expect(json.value[1].value).toBe("1");
+    });
+
+    it('should return an empty list if the owner has no events', () => {
+      simnet.callPublicFn('ewatch', 'register-event', [Cl.stringAscii('mint'), Cl.stringAscii('first data')], wallet1);
+
+      const emptyResult = simnet.callReadOnlyFn(
+        'ewatch',
+        'get-events-by-owner',
+        [Cl.standardPrincipal(wallet2)],
+        wallet1
+      );
+      const json = cvToJSON(emptyResult.result);
+      expect(json.value).toEqual([]);
+    });
+  });
+
   describe('get-event-count', () => {
     it('should return zero when no events are registered', () => {
       const result = simnet.callReadOnlyFn(

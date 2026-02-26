@@ -101,7 +101,7 @@ describe('E-Watch v1 Contract', () => {
         ],
         wallet1
       );
-      expect(receipt.result).toEqual(Cl.ok(Cl.uint(0)));
+      expect(receipt.result).toEqual(Cl.error(Cl.uint(400)));
     });
   });
 

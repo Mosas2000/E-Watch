@@ -14,12 +14,15 @@
 (define-constant ERR-NOT-FOUND (err u404))
 (define-constant ERR-UNAUTHORIZED (err u403))
 (define-constant ERR-INACTIVE (err u410))
+(define-constant ERR-INVALID-INPUT (err u400))
 
 (define-public (register-event (event-type (string-ascii 50)) (data (string-ascii 500)))
   (let
     (
       (event-id (var-get event-counter))
     )
+    (asserts! (> (len event-type) u0) ERR-INVALID-INPUT)
+    (asserts! (> (len data) u0) ERR-INVALID-INPUT)
     (map-set events
       { event-id: event-id }
       {
@@ -48,6 +51,7 @@
     (
       (event (unwrap! (get-event event-id) ERR-NOT-FOUND))
     )
+    (asserts! (> (len new-data) u0) ERR-INVALID-INPUT)
     (asserts! (is-eq tx-sender (get owner event)) ERR-UNAUTHORIZED)
     (asserts! (get active event) ERR-INACTIVE)
     (map-set events

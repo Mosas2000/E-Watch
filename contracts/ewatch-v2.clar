@@ -37,7 +37,7 @@
 (define-constant ERR-UNAUTHORIZED (err u403))
 (define-constant ERR-INACTIVE (err u410))
 (define-constant ERR-PAUSED (err u503))
-(define-constant ERR-INVALID-VERSION (err u400))
+(define-constant ERR-INVALID-INPUT (err u400))
 
 ;; -- Admin Functions -----------------------------------------------
 
@@ -91,6 +91,8 @@
   )
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR-UNAUTHORIZED)
+    (asserts! (> (len event-type) u0) ERR-INVALID-INPUT)
+    (asserts! (> (len data) u0) ERR-INVALID-INPUT)
     (map-set events
       { event-id: event-id }
       {
@@ -125,6 +127,8 @@
 (define-public (register-event (event-type (string-ascii 50)) (data (string-ascii 500)))
   (begin
     (asserts! (not (var-get contract-paused)) ERR-PAUSED)
+    (asserts! (> (len event-type) u0) ERR-INVALID-INPUT)
+    (asserts! (> (len data) u0) ERR-INVALID-INPUT)
     (let
       (
         (event-id (var-get event-counter))

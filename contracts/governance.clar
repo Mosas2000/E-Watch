@@ -67,7 +67,7 @@
   (let
     (
       (proposal-id (var-get proposal-counter))
-      (end-block (+ stacks-block-height VOTING-DURATION))
+      (end-block (+ block-height VOTING-DURATION))
     )
     (asserts! (> (len title) u0) ERR-INVALID-INPUT)
     (asserts! (> (len description) u0) ERR-INVALID-INPUT)
@@ -78,7 +78,7 @@
         title: title,
         description: description,
         category: category,
-        created-at: stacks-block-height,
+        created-at: block-height,
         end-block: end-block,
         votes-for: u0,
         votes-against: u0,
@@ -100,7 +100,7 @@
       (history (default-to { total-votes: u0 } (map-get? voter-history { voter: tx-sender })))
     )
     ;; Must still be in voting window
-    (asserts! (<= stacks-block-height (get end-block proposal)) ERR-VOTING-ENDED)
+    (asserts! (<= block-height (get end-block proposal)) ERR-VOTING-ENDED)
     ;; Must be open
     (asserts! (is-eq (get status proposal) STATUS-OPEN) ERR-PROPOSAL-CLOSED)
     ;; One address one vote
@@ -116,10 +116,10 @@
     (map-set proposals
       { proposal-id: proposal-id }
       (merge proposal
-        (if in-favor
-          { votes-for: (+ (get votes-for proposal) u1) }
-          { votes-against: (+ (get votes-against proposal) u1) }
-        )
+        {
+          votes-for: (if in-favor (+ (get votes-for proposal) u1) (get votes-for proposal)),
+          votes-against: (if in-favor (get votes-against proposal) (+ (get votes-against proposal) u1))
+        }
       )
     )
 
@@ -141,7 +141,7 @@
       (total-votes (+ (get votes-for proposal) (get votes-against proposal)))
     )
     ;; Voting period must be over
-    (asserts! (> stacks-block-height (get end-block proposal)) ERR-PROPOSAL-CLOSED)
+    (asserts! (> block-height (get end-block proposal)) ERR-PROPOSAL-CLOSED)
     ;; Must still be open
     (asserts! (is-eq (get status proposal) STATUS-OPEN) ERR-PROPOSAL-CLOSED)
 
@@ -200,7 +200,7 @@
   (match (map-get? proposals { proposal-id: proposal-id })
     proposal (and
       (is-eq (get status proposal) STATUS-OPEN)
-      (<= stacks-block-height (get end-block proposal))
+      (<= block-height (get end-block proposal))
     )
     false
   )

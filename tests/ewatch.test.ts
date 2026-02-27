@@ -54,12 +54,12 @@ describe('E-Watch v1 Contract', () => {
     });
 
     it('should reject data exceeding 500 characters', () => {
-      const longData = 'x'.repeat(501);
+      const longData = 'b'.repeat(501);
       expect(() => {
         simnet.callPublicFn(
           'ewatch',
           'register-event',
-          [Cl.stringAscii('mint'), Cl.stringAscii(longData)],
+          [Cl.stringAscii('mint_2'), Cl.stringAscii(longData)],
           wallet1
         );
       }).toThrow();
@@ -146,6 +146,31 @@ describe('E-Watch v1 Contract', () => {
       );
       const json = cvToJSON(emptyResult.result);
       expect(json.value).toEqual([]);
+    });
+  });
+
+  describe('get-events-page', () => {
+    it('should batch resolve multiple event IDs', () => {
+      // Create a couple events
+      simnet.callPublicFn('ewatch', 'register-event', [Cl.stringAscii('mint'), Cl.stringAscii('data 1')], wallet1);
+      simnet.callPublicFn('ewatch', 'register-event', [Cl.stringAscii('transfer'), Cl.stringAscii('data 2')], wallet1);
+
+      const result = simnet.callReadOnlyFn(
+        'ewatch',
+        'get-events-page',
+        [Cl.list([Cl.uint(0), Cl.uint(1), Cl.uint(999)])],
+        wallet1
+      );
+      const json = cvToJSON(result.result);
+      expect(json.value).toBeDefined();
+      expect(json.value.length).toBe(3);
+
+      // JSON parses the `some` tuple for 0 and 1
+      expect(json.value[0].value.value.data.value).toBe('data 1');
+      expect(json.value[1].value.value.data.value).toBe('data 2');
+
+      // JSON 999 yields `none` via cvToJSON which converts to null
+      expect(json.value[2].value).toBe(null);
     });
   });
 

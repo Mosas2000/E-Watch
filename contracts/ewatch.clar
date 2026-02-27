@@ -59,6 +59,10 @@
   (map-get? events { event-id: event-id })
 )
 
+(define-read-only (get-events-page (ids (list 100 uint)))
+  (map get-event ids)
+)
+
 (define-read-only (get-event-count)
   (ok (var-get event-counter))
 )

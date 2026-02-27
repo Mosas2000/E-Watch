@@ -149,6 +149,39 @@ describe('E-Watch v1 Contract', () => {
     });
   });
 
+  describe('get-events-by-type', () => {
+    it('should return a list of event IDs registered under a specific type', () => {
+      simnet.callPublicFn('ewatch', 'register-event', [Cl.stringAscii('mint'), Cl.stringAscii('mint data')], wallet1);
+      simnet.callPublicFn('ewatch', 'register-event', [Cl.stringAscii('transfer'), Cl.stringAscii('transfer data')], wallet1);
+      simnet.callPublicFn('ewatch', 'register-event', [Cl.stringAscii('mint'), Cl.stringAscii('another mint data')], wallet2);
+
+      const result = simnet.callReadOnlyFn(
+        'ewatch',
+        'get-events-by-type',
+        [Cl.stringAscii('mint')],
+        wallet1
+      );
+      const json = cvToJSON(result.result);
+      expect(json.value).toBeDefined();
+      expect(json.value.length).toBe(2);
+      expect(json.value[0].value).toBe("0"); // First mint event
+      expect(json.value[1].value).toBe("2"); // Second mint event
+    });
+
+    it('should return an empty list if there are no events of that type', () => {
+      simnet.callPublicFn('ewatch', 'register-event', [Cl.stringAscii('mint'), Cl.stringAscii('mint data')], wallet1);
+
+      const emptyResult = simnet.callReadOnlyFn(
+        'ewatch',
+        'get-events-by-type',
+        [Cl.stringAscii('transfer')],
+        wallet1
+      );
+      const json = cvToJSON(emptyResult.result);
+      expect(json.value).toEqual([]);
+    });
+  });
+
   describe('get-events-page', () => {
     it('should batch resolve multiple event IDs', () => {
       // Create a couple events

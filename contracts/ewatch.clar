@@ -14,6 +14,11 @@
   { events: (list 100 uint) }
 )
 
+(define-map events-by-type
+  { event-type: (string-ascii 50) }
+  { events: (list 100 uint) }
+)
+
 (define-data-var event-counter uint u0)
 
 (define-constant ERR-NOT-FOUND (err u404))
@@ -26,6 +31,7 @@
     (
       (event-id (var-get event-counter))
       (current-events (default-to (list) (get events (map-get? events-by-owner { owner: tx-sender }))))
+      (current-type-events (default-to (list) (get events (map-get? events-by-type { event-type: event-type }))))
     )
     (asserts! (> (len event-type) u0) ERR-INVALID-INPUT)
     (asserts! (> (len data) u0) ERR-INVALID-INPUT)
@@ -46,6 +52,13 @@
       )
       true
     )
+    (if (< (len current-type-events) u100)
+      (map-set events-by-type
+        { event-type: event-type }
+        { events: (unwrap-panic (as-max-len? (append current-type-events event-id) u100)) }
+      )
+      true
+    )
     (var-set event-counter (+ event-id u1))
     (ok event-id)
   )
@@ -53,6 +66,10 @@
 
 (define-read-only (get-events-by-owner (owner principal))
   (default-to (list) (get events (map-get? events-by-owner { owner: owner })))
+)
+
+(define-read-only (get-events-by-type (event-type (string-ascii 50)))
+  (default-to (list) (get events (map-get? events-by-type { event-type: event-type })))
 )
 
 (define-read-only (get-event (event-id uint))

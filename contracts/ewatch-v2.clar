@@ -31,6 +31,11 @@
   { events: (list 100 uint) }
 )
 
+(define-map events-by-type
+  { event-type: (string-ascii 50) }
+  { events: (list 100 uint) }
+)
+
 (define-data-var event-counter uint u0)
 (define-data-var contract-version uint u2)
 (define-data-var contract-paused bool false)
@@ -97,6 +102,7 @@
   (let
     (
       (current-events (default-to (list) (get events (map-get? events-by-owner { owner: owner }))))
+      (current-type-events (default-to (list) (get events (map-get? events-by-type { event-type: event-type }))))
     )
     (asserts! (is-eq tx-sender (var-get admin)) ERR-UNAUTHORIZED)
     (asserts! (> (len event-type) u0) ERR-INVALID-INPUT)
@@ -116,6 +122,14 @@
       (map-set events-by-owner
         { owner: owner }
         { events: (unwrap-panic (as-max-len? (append current-events event-id) u100)) }
+      )
+      true
+    )
+    ;; Update type mapping if there's room
+    (if (< (len current-type-events) u100)
+      (map-set events-by-type
+        { event-type: event-type }
+        { events: (unwrap-panic (as-max-len? (append current-type-events event-id) u100)) }
       )
       true
     )
@@ -149,6 +163,7 @@
       (
         (event-id (var-get event-counter))
         (current-events (default-to (list) (get events (map-get? events-by-owner { owner: tx-sender }))))
+        (current-type-events (default-to (list) (get events (map-get? events-by-type { event-type: event-type }))))
       )
       (map-set events
         { event-id: event-id }
@@ -167,6 +182,13 @@
         )
         true
       )
+      (if (< (len current-type-events) u100)
+        (map-set events-by-type
+          { event-type: event-type }
+          { events: (unwrap-panic (as-max-len? (append current-type-events event-id) u100)) }
+        )
+        true
+      )
       (var-set event-counter (+ event-id u1))
       (ok event-id)
     )
@@ -175,6 +197,10 @@
 
 (define-read-only (get-events-by-owner (owner principal))
   (default-to (list) (get events (map-get? events-by-owner { owner: owner })))
+)
+
+(define-read-only (get-events-by-type (event-type (string-ascii 50)))
+  (default-to (list) (get events (map-get? events-by-type { event-type: event-type })))
 )
 
 (define-read-only (get-event (event-id uint))

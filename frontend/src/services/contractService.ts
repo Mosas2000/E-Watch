@@ -19,7 +19,7 @@ import {
 } from '@stacks/transactions';
 import { openContractCall } from '@stacks/connect';
 import { getStacksNetwork } from '../config/networkConfig';
-import { requireAuth } from '../auth';
+import { requireAuth, userSession } from '../auth';
 import logger from '../utils/logger';
 import { RequestCache } from '../utils/requestCache';
 import { RateLimiter } from '../utils/rateLimiter';
@@ -37,6 +37,83 @@ const countCache = new RequestCache<unknown>(15_000, 1);
 
 // Rate limiter: allow 20 read-only calls per minute
 const readLimiter = new RateLimiter(20, 60_000);
+
+/**
+ * Custom Error wrapper standardizing contract transaction rejections 
+ * enforcing explicit recovery behaviors.
+ */
+export class ContractError extends Error {
+  code: string;
+  userMessage: string;
+  recoverySuggestion: string;
+
+  constructor(code: string, message: string, userMessage: string, recoverySuggestion: string) {
+    super(message);
+    this.name = 'ContractError';
+    this.code = code;
+    this.userMessage = userMessage;
+    this.recoverySuggestion = recoverySuggestion;
+  }
+}
+
+/**
+ * Utility wrapper to enforce Stacks transaction promises correctly 
+ * mapping timeouts and user cancellations into ContractError boundaries.
+ */
+const executeWalletTransaction = async (
+  options: any,
+  actionName: string
+): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    // Failsafe timeout at 5 minutes to prevent hanging Promises
+    const timeout = setTimeout(() => {
+      logger.error(`Transaction ${actionName} timed out before wallet response`);
+      reject(
+        new ContractError(
+          'ERR_TIMEOUT',
+          'Transaction setup timed out',
+          'The wallet connection timed out.',
+          'Please ensure your Stacks wallet is unlocked and try again.'
+        )
+      );
+    }, 300_000);
+
+    try {
+      openContractCall({
+        ...options,
+        onFinish: (data) => {
+          clearTimeout(timeout);
+          logger.transaction(`${actionName} completed`, { txid: data.txId });
+          invalidateCache();
+          resolve(data);
+        },
+        onCancel: () => {
+          clearTimeout(timeout);
+          logger.warn(`${actionName} cancelled by user`);
+          reject(
+            new ContractError(
+              'ERR_USER_CANCEL',
+              'User rejected transaction',
+              'You cancelled the transaction in your wallet.',
+              'No changes were made. You can safely try again.'
+            )
+          );
+        },
+      });
+    } catch (err: any) {
+      clearTimeout(timeout);
+      logger.error(`Failed executing ${actionName}`, { error: err.message });
+      reject(
+        new ContractError(
+          'ERR_NETWORK',
+          err.message,
+          'A network error interrupted the transaction.',
+          'Please check your internet connection and network configuration.'
+        )
+      );
+    }
+  });
+};
 
 /**
  * Invalidate all cached data. Call this after a write operation
@@ -62,19 +139,39 @@ export const registerEvent = async (eventType: string, data: string) => {
   requireAuth('register an event');
 
   if (!eventType || eventType.trim().length === 0) {
-    throw new Error('eventType must not be empty');
+    throw new ContractError(
+      'ERR_VALIDATION',
+      'eventType empty',
+      'Event category cannot be empty.',
+      'Provide a label for your event.'
+    );
   }
 
-  if (eventType.length > 128) {
-    throw new Error('eventType exceeds maximum length of 128 characters');
+  if (eventType.length > 50) {
+    throw new ContractError(
+      'ERR_VALIDATION',
+      'eventType exceeds limit',
+      'Event category is too long (Max 50 characters).',
+      'Shorten the category string.'
+    );
   }
 
   if (!data || data.trim().length === 0) {
-    throw new Error('data must not be empty');
+    throw new ContractError(
+      'ERR_VALIDATION',
+      'data empty',
+      'Event data payload cannot be empty.',
+      'Provide data attached to your event log.'
+    );
   }
 
-  if (data.length > 256) {
-    throw new Error('data exceeds maximum length of 256 characters');
+  if (data.length > 500) {
+    throw new ContractError(
+      'ERR_VALIDATION',
+      'data exceeds limit',
+      'Event payload is too long (Max 500 characters).',
+      'Shorten the payload string data.'
+    );
   }
 
   logger.info('Initiating event registration', {
@@ -82,31 +179,15 @@ export const registerEvent = async (eventType: string, data: string) => {
     dataLength: data.length,
   });
 
-  return new Promise((resolve, reject) => {
-    openContractCall({
-      contractAddress,
-      contractName,
-      functionName: 'register-event',
-      functionArgs: [stringAsciiCV(eventType), stringAsciiCV(data)],
-      network,
-      anchorMode: AnchorMode.Any,
-      postConditionMode: PostConditionMode.Allow,
-      onFinish: (data) => {
-        logger.transaction('Event registration completed', {
-          eventType,
-          txid: data.txId,
-        });
-        invalidateCache();
-        resolve(data);
-      },
-      onCancel: () => {
-        logger.warn('Event registration cancelled by user', {
-          eventType,
-        });
-        reject(new Error('Transaction cancelled by user'));
-      },
-    });
-  });
+  return executeWalletTransaction({
+    contractAddress,
+    contractName,
+    functionName: 'register-event',
+    functionArgs: [stringAsciiCV(eventType), stringAsciiCV(data)],
+    network,
+    anchorMode: AnchorMode.Any,
+    postConditionMode: PostConditionMode.Allow
+  }, 'Event registration');
 };
 
 /**
@@ -118,8 +199,8 @@ export const registerEvent = async (eventType: string, data: string) => {
  * @throws On network failure, rate limiting, or invalid eventId
  */
 export const getEvent = async (eventId: number) => {
-  if (!Number.isInteger(eventId) || eventId < 1) {
-    throw new Error('eventId must be a positive integer');
+  if (!Number.isInteger(eventId) || eventId < 0) {
+    throw new Error('eventId must be a zero or positive integer');
   }
 
   const cacheKey = `event:${eventId}`;
@@ -139,8 +220,11 @@ export const getEvent = async (eventId: number) => {
       retryAfterMs: retryAfter,
       remaining: readLimiter.remaining,
     });
-    throw new Error(
+    throw new ContractError(
+      'ERR_RATE_LIMIT',
+      'Read operations exceeded',
       `Rate limit exceeded. Please wait ${Math.ceil(retryAfter / 1000)} seconds before trying again.`,
+      'Wait out the active throttling delay.'
     );
   }
 
@@ -190,7 +274,12 @@ export const getEvent = async (eventId: number) => {
       eventId,
       error: error.message,
     });
-    throw error;
+    throw new ContractError(
+      'ERR_NETWORK',
+      error.message,
+      'Could not communicate with the smart contract.',
+      'Check your connection and Stacks node availability.'
+    );
   }
 };
 
@@ -217,8 +306,11 @@ export const getEventCount = async () => {
     logger.warn('Rate limit exceeded for event count', {
       retryAfterMs: retryAfter,
     });
-    throw new Error(
+    throw new ContractError(
+      'ERR_RATE_LIMIT',
+      'Read limit exceeded',
       `Rate limit exceeded. Please wait ${Math.ceil(retryAfter / 1000)} seconds.`,
+      'Wait for the block cycle to reload capacities.'
     );
   }
 
@@ -264,7 +356,12 @@ export const getEventCount = async () => {
     logger.error('Failed to fetch event count', {
       error: error.message,
     });
-    throw error;
+    throw new ContractError(
+      'ERR_NETWORK',
+      error.message,
+      'Network timeout establishing counter payload',
+      'Try refreshing the active connection instance.'
+    );
   }
 };
 
@@ -278,18 +375,35 @@ export const getEventCount = async () => {
  * @throws If not authenticated, input is invalid, or the user cancels
  */
 export const updateEvent = async (eventId: number, newData: string) => {
-  requireAuth('update an event');
+  if (!userSession.isUserSignedIn()) {
+    requireAuth('update an event');
+  }
 
-  if (!Number.isInteger(eventId) || eventId < 1) {
-    throw new Error('eventId must be a positive integer');
+  if (!Number.isInteger(eventId) || eventId < 0) {
+    throw new ContractError(
+      'ERR_VALIDATION',
+      'Invalid eventId string matching',
+      'Cannot update unspecified block attributes',
+      'Provide an existing positive numeric target'
+    );
   }
 
   if (!newData || newData.trim().length === 0) {
-    throw new Error('newData must not be empty');
+    throw new ContractError(
+      'ERR_VALIDATION',
+      'newData is undefined',
+      'Contract updates must map a valid payload structure',
+      'Supply a payload of content logic replacing the previous node'
+    );
   }
 
-  if (newData.length > 256) {
-    throw new Error('newData exceeds maximum length of 256 characters');
+  if (newData.length > 500) {
+    throw new ContractError(
+      'ERR_VALIDATION',
+      'newData exceeds character maximum',
+      'Cannot index payloads more than 500 characters',
+      'Isolate content variables into segmented structures'
+    );
   }
 
   logger.info('Initiating event update', {
@@ -297,29 +411,15 @@ export const updateEvent = async (eventId: number, newData: string) => {
     dataLength: newData.length,
   });
 
-  return new Promise((resolve, reject) => {
-    openContractCall({
-      contractAddress,
-      contractName,
-      functionName: 'update-event',
-      functionArgs: [uintCV(eventId), stringAsciiCV(newData)],
-      network,
-      anchorMode: AnchorMode.Any,
-      postConditionMode: PostConditionMode.Allow,
-      onFinish: (data) => {
-        logger.transaction('Event update completed', {
-          eventId,
-          txid: data.txId,
-        });
-        invalidateCache();
-        resolve(data);
-      },
-      onCancel: () => {
-        logger.warn('Event update cancelled by user', { eventId });
-        reject(new Error('Transaction cancelled by user'));
-      },
-    });
-  });
+  return executeWalletTransaction({
+    contractAddress,
+    contractName,
+    functionName: 'update-event',
+    functionArgs: [uintCV(eventId), stringAsciiCV(newData)],
+    network,
+    anchorMode: AnchorMode.Any,
+    postConditionMode: PostConditionMode.Allow
+  }, 'Event update');
 };
 
 /**
@@ -331,35 +431,28 @@ export const updateEvent = async (eventId: number, newData: string) => {
  * @throws If not authenticated, eventId is invalid, or the user cancels
  */
 export const deactivateEvent = async (eventId: number) => {
-  requireAuth('deactivate an event');
+  if (!userSession.isUserSignedIn()) {
+    requireAuth('deactivate an event');
+  }
 
-  if (!Number.isInteger(eventId) || eventId < 1) {
-    throw new Error('eventId must be a positive integer');
+  if (!Number.isInteger(eventId) || eventId < 0) {
+    throw new ContractError(
+      'ERR_VALIDATION',
+      'Missing numeric event identifier',
+      'Cannot map null identifier instances toward contract execution limits',
+      'Isolate precise tuple properties manually bounding positive IDs'
+    );
   }
 
   logger.info('Initiating event deactivation', { eventId });
 
-  return new Promise((resolve, reject) => {
-    openContractCall({
-      contractAddress,
-      contractName,
-      functionName: 'deactivate-event',
-      functionArgs: [uintCV(eventId)],
-      network,
-      anchorMode: AnchorMode.Any,
-      postConditionMode: PostConditionMode.Allow,
-      onFinish: (data) => {
-        logger.transaction('Event deactivation completed', {
-          eventId,
-          txid: data.txId,
-        });
-        invalidateCache();
-        resolve(data);
-      },
-      onCancel: () => {
-        logger.warn('Event deactivation cancelled by user', { eventId });
-        reject(new Error('Transaction cancelled by user'));
-      },
-    });
-  });
+  return executeWalletTransaction({
+    contractAddress,
+    contractName,
+    functionName: 'deactivate-event',
+    functionArgs: [uintCV(eventId)],
+    network,
+    anchorMode: AnchorMode.Any,
+    postConditionMode: PostConditionMode.Allow
+  }, 'Event deactivation');
 };

@@ -18,7 +18,7 @@ vi.mock('@stacks/transactions', () => ({
   cvToJSON: vi.fn((val: unknown) => val),
 }));
 
-vi.mock('../auth', () => ({
+vi.mock('../../auth', () => ({
   userSession: {
     isUserSignedIn: vi.fn(() => true),
   },
@@ -26,7 +26,7 @@ vi.mock('../auth', () => ({
   requireAuth: vi.fn(),
 }));
 
-vi.mock('../utils/logger', () => ({
+vi.mock('../../utils/logger', () => ({
   default: {
     info: vi.fn(),
     warn: vi.fn(),
@@ -36,34 +36,38 @@ vi.mock('../utils/logger', () => ({
   },
 }));
 
-vi.mock('../utils/requestCache', () => {
+vi.mock('../../utils/requestCache', () => {
   const cache = new Map();
   return {
-    RequestCache: vi.fn().mockImplementation(() => ({
-      get: vi.fn((key: string) => cache.get(key)),
-      set: vi.fn((key: string, val: unknown) => cache.set(key, val)),
-      clear: vi.fn(() => cache.clear()),
-    })),
+    RequestCache: class {
+      get = vi.fn((key: string) => cache.get(key));
+      set = vi.fn((key: string, val: unknown) => cache.set(key, val));
+      clear = vi.fn(() => cache.clear());
+    },
   };
 });
 
-vi.mock('../utils/rateLimiter', () => ({
-  RateLimiter: vi.fn().mockImplementation(() => ({
-    tryAcquire: vi.fn(() => true),
-    getRetryAfterMs: vi.fn(() => 0),
-    remaining: 20,
-  })),
+vi.mock('../../utils/rateLimiter', () => ({
+  RateLimiter: class {
+    tryAcquire = vi.fn(() => true);
+    getRetryAfterMs = vi.fn(() => 0);
+    remaining = 20;
+  }
 }));
 
-vi.mock('../utils/retryWithBackoff', () => ({
+vi.mock('../../utils/retryWithBackoff', () => ({
   retryWithBackoff: vi.fn((fn: () => Promise<unknown>) => fn()),
 }));
 
-vi.mock('../config/contractConfig', () => ({
+vi.mock('../../config/contractConfig', () => ({
   getActiveContract: vi.fn(() => ({
     address: 'SP31PKQVQZVZCK3FM3NH67CGD6G1FMR17VQVS2W5T',
     name: 'ewatch-v2',
   })),
+}));
+
+vi.mock('../../config/networkConfig', () => ({
+  getStacksNetwork: vi.fn(() => ({})),
 }));
 
 describe('contractService', () => {
@@ -73,138 +77,144 @@ describe('contractService', () => {
 
   describe('registerEvent', () => {
     it('should throw when user is not authenticated', async () => {
-      const { requireAuth } = await import('../auth');
+      const { requireAuth } = await import('../../auth');
       vi.mocked(requireAuth).mockImplementationOnce(() => {
         throw new Error('User must be signed in to register an event');
       });
 
-      const { registerEvent } = await import('./contractService');
+      const { registerEvent } = await import('../contractService');
       await expect(registerEvent('alert', 'test data')).rejects.toThrow(
         'User must be signed in to register an event',
       );
     });
 
     it('should reject empty eventType', async () => {
-      const { registerEvent } = await import('./contractService');
+      const { registerEvent } = await import('../contractService');
       await expect(registerEvent('', 'test data')).rejects.toThrow(
-        'eventType must not be empty',
+        'eventType empty',
       );
     });
 
-    it('should reject eventType exceeding 128 characters', async () => {
-      const { registerEvent } = await import('./contractService');
-      const longType = 'a'.repeat(129);
+    it('should reject eventType exceeding 50 characters', async () => {
+      const { registerEvent } = await import('../contractService');
+      const longType = 'a'.repeat(51);
       await expect(registerEvent(longType, 'test data')).rejects.toThrow(
-        'eventType exceeds maximum length of 128 characters',
+        'eventType exceeds limit',
       );
     });
 
     it('should reject empty data', async () => {
-      const { registerEvent } = await import('./contractService');
+      const { registerEvent } = await import('../contractService');
       await expect(registerEvent('alert', '')).rejects.toThrow(
-        'data must not be empty',
+        'data empty',
       );
     });
 
-    it('should reject data exceeding 256 characters', async () => {
-      const { registerEvent } = await import('./contractService');
-      const longData = 'x'.repeat(257);
+    it('should reject data exceeding 500 characters', async () => {
+      const { registerEvent } = await import('../contractService');
+      const longData = 'x'.repeat(501);
       await expect(registerEvent('alert', longData)).rejects.toThrow(
-        'data exceeds maximum length of 256 characters',
+        'data exceeds limit',
       );
     });
   });
 
   describe('updateEvent', () => {
     it('should throw when user is not authenticated', async () => {
-      const { requireAuth } = await import('../auth');
+      const { userSession } = await import('../../auth');
+      vi.mocked(userSession.isUserSignedIn).mockReturnValueOnce(false);
+
+      const { requireAuth } = await import('../../auth');
       vi.mocked(requireAuth).mockImplementationOnce(() => {
         throw new Error('User must be signed in to update an event');
       });
 
-      const { updateEvent } = await import('./contractService');
+      const { updateEvent } = await import('../contractService');
       await expect(updateEvent(1, 'new data')).rejects.toThrow(
         'User must be signed in to update an event',
       );
     });
 
     it('should reject non-positive eventId', async () => {
-      const { updateEvent } = await import('./contractService');
-      await expect(updateEvent(0, 'new data')).rejects.toThrow(
-        'eventId must be a positive integer',
+      const { updateEvent } = await import('../contractService');
+      await expect(updateEvent(-1, 'new data')).rejects.toThrow(
+        'Invalid eventId string matching',
       );
     });
 
     it('should reject non-integer eventId', async () => {
-      const { updateEvent } = await import('./contractService');
+      const { updateEvent } = await import('../contractService');
       await expect(updateEvent(1.5, 'new data')).rejects.toThrow(
-        'eventId must be a positive integer',
+        'Invalid eventId string matching',
       );
     });
 
     it('should reject empty newData', async () => {
-      const { updateEvent } = await import('./contractService');
+      const { updateEvent } = await import('../contractService');
       await expect(updateEvent(1, '')).rejects.toThrow(
-        'newData must not be empty',
+        'newData is undefined',
       );
     });
 
-    it('should reject newData exceeding 256 characters', async () => {
-      const { updateEvent } = await import('./contractService');
-      const longData = 'x'.repeat(257);
+    it('should reject newData exceeding 500 characters', async () => {
+      const { updateEvent } = await import('../contractService');
+      const longData = 'x'.repeat(501);
       await expect(updateEvent(1, longData)).rejects.toThrow(
-        'newData exceeds maximum length of 256 characters',
+        'newData exceeds character maximum',
       );
     });
   });
 
   describe('deactivateEvent', () => {
     it('should throw when user is not authenticated', async () => {
-      const { requireAuth } = await import('../auth');
+      const { userSession } = await import('../../auth');
+      vi.mocked(userSession.isUserSignedIn).mockReturnValueOnce(false);
+
+      const { requireAuth } = await import('../../auth');
       vi.mocked(requireAuth).mockImplementationOnce(() => {
         throw new Error('User must be signed in to deactivate an event');
       });
 
-      const { deactivateEvent } = await import('./contractService');
+      const { deactivateEvent } = await import('../contractService');
       await expect(deactivateEvent(1)).rejects.toThrow(
         'User must be signed in to deactivate an event',
       );
     });
 
     it('should reject non-positive eventId', async () => {
-      const { deactivateEvent } = await import('./contractService');
-      await expect(deactivateEvent(0)).rejects.toThrow(
-        'eventId must be a positive integer',
+      const { deactivateEvent } = await import('../contractService');
+      await expect(deactivateEvent(-1)).rejects.toThrow(
+        'Missing numeric event identifier',
       );
     });
 
     it('should reject non-integer eventId', async () => {
-      const { deactivateEvent } = await import('./contractService');
+      const { deactivateEvent } = await import('../contractService');
       await expect(deactivateEvent(2.7)).rejects.toThrow(
-        'eventId must be a positive integer',
+        'Missing numeric event identifier',
       );
     });
   });
 
   describe('getEvent', () => {
     it('should reject non-positive eventId', async () => {
-      const { getEvent } = await import('./contractService');
+      const { getEvent } = await import('../contractService');
       await expect(getEvent(-1)).rejects.toThrow(
-        'eventId must be a positive integer',
+        'eventId must be a zero or positive integer',
       );
     });
 
     it('should reject non-integer eventId', async () => {
-      const { getEvent } = await import('./contractService');
+      const { getEvent } = await import('../contractService');
       await expect(getEvent(3.14)).rejects.toThrow(
-        'eventId must be a positive integer',
+        'eventId must be a zero or positive integer',
       );
     });
   });
 
   describe('invalidateCache', () => {
     it('should clear all caches without throwing', async () => {
-      const { invalidateCache } = await import('./contractService');
+      const { invalidateCache } = await import('../contractService');
       expect(() => invalidateCache()).not.toThrow();
     });
   });

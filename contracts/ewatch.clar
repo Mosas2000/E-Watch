@@ -34,7 +34,7 @@
       {
         owner: tx-sender,
         event-type: event-type,
-        timestamp: block-height,
+        timestamp: (default-to u0 (get-block-info? time block-height)),
         data: data,
         active: true
       }

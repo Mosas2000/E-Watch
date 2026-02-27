@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { initSimnet } from "@hirosystems/clarinet-sdk";
+import { Cl, cvToJSON } from "@stacks/transactions";
 
 /**
  * Integration Tests
@@ -8,78 +10,52 @@ import { describe, it, expect, beforeEach } from "vitest";
  * workflow rather than isolated function calls.
  */
 
-interface EventEntry {
-  owner: string;
-  "event-type": string;
-  timestamp: number;
-  data: string;
-  active: boolean;
-}
-
-let events: Map<number, EventEntry>;
-let counter: number;
-let paused: boolean;
-let admin: string;
-
+let simnet: any;
 const DEPLOYER = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM";
 const ALICE = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
 const BOB = "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG";
 const CAROL = "ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC";
 
-beforeEach(() => {
-  events = new Map();
-  counter = 0;
-  paused = false;
-  admin = DEPLOYER;
+beforeEach(async () => {
+  simnet = await initSimnet();
 });
 
 function registerEvent(caller: string, eventType: string, data: string) {
-  if (paused) return { err: 503 };
-  const id = counter;
-  events.set(id, {
-    owner: caller,
-    "event-type": eventType,
-    timestamp: 100 + id,
-    data,
-    active: true,
-  });
-  counter = id + 1;
-  return { ok: id };
+  return simnet.callPublicFn(
+    "ewatch-v2",
+    "register-event",
+    [Cl.stringAscii(eventType), Cl.stringAscii(data)],
+    caller
+  );
 }
 
 function getEvent(id: number) {
-  return events.get(id);
+  return simnet.callReadOnlyFn("ewatch-v2", "get-event", [Cl.uint(id)], DEPLOYER);
 }
 
 function updateEvent(caller: string, id: number, newData: string) {
-  if (paused) return { err: 503 };
-  const ev = events.get(id);
-  if (!ev) return { err: 404 };
-  if (ev.owner !== caller) return { err: 403 };
-  if (!ev.active) return { err: 410 };
-  events.set(id, { ...ev, data: newData });
-  return { ok: true };
+  return simnet.callPublicFn(
+    "ewatch-v2",
+    "update-event",
+    [Cl.uint(id), Cl.stringAscii(newData)],
+    caller
+  );
 }
 
 function deactivateEvent(caller: string, id: number) {
-  if (paused) return { err: 503 };
-  const ev = events.get(id);
-  if (!ev) return { err: 404 };
-  if (ev.owner !== caller) return { err: 403 };
-  events.set(id, { ...ev, active: false });
-  return { ok: true };
+  return simnet.callPublicFn("ewatch-v2", "deactivate-event", [Cl.uint(id)], caller);
 }
 
 function pauseContract(caller: string) {
-  if (caller !== admin) return { err: 403 };
-  paused = true;
-  return { ok: true };
+  return simnet.callPublicFn("ewatch-v2", "pause-contract", [], caller);
 }
 
 function unpauseContract(caller: string) {
-  if (caller !== admin) return { err: 403 };
-  paused = false;
-  return { ok: true };
+  return simnet.callPublicFn("ewatch-v2", "unpause-contract", [], caller);
+}
+
+function getEventCount() {
+  return simnet.callReadOnlyFn("ewatch-v2", "get-event-count", [], DEPLOYER);
 }
 
 // ── Full registration and query flow ─────────────────────
@@ -87,39 +63,48 @@ function unpauseContract(caller: string) {
 describe("integration :: registration and query flow", () => {
   it("register then immediately retrieve returns matching data", () => {
     const reg = registerEvent(ALICE, "temperature", "sensor-42-high");
-    expect(reg).toEqual({ ok: 0 });
-    const ev = getEvent(0);
-    expect(ev).toBeDefined();
-    expect(ev!.owner).toBe(ALICE);
-    expect(ev!["event-type"]).toBe("temperature");
-    expect(ev!.data).toBe("sensor-42-high");
-    expect(ev!.active).toBe(true);
+    expect(cvToJSON(reg.result).value.value).toBe("0");
+
+    const evResult = getEvent(0);
+    const ev = cvToJSON(evResult.result).value.value;
+
+    expect(ev.owner.value).toBe(ALICE);
+    expect(ev["event-type"].value).toBe("temperature");
+    expect(ev.data.value).toBe("sensor-42-high");
+    expect(ev.active.value).toBe(true);
   });
 
   it("register, update, then retrieve shows updated data", () => {
     registerEvent(ALICE, "pressure", "valve-3-normal");
-    updateEvent(ALICE, 0, "valve-3-critical");
-    const ev = getEvent(0);
-    expect(ev!.data).toBe("valve-3-critical");
-    expect(ev!["event-type"]).toBe("pressure");
+    const updateResult = updateEvent(ALICE, 0, "valve-3-critical");
+    expect(cvToJSON(updateResult.result).value.value).toBe(true);
+
+    const evResult = getEvent(0);
+    const ev = cvToJSON(evResult.result).value.value;
+    expect(ev.data.value).toBe("valve-3-critical");
+    expect(ev["event-type"].value).toBe("pressure");
   });
 
   it("register, deactivate, then confirm inactive status", () => {
     registerEvent(ALICE, "maintenance", "scheduled-check");
     deactivateEvent(ALICE, 0);
-    const ev = getEvent(0);
-    expect(ev!.active).toBe(false);
-    expect(ev!.data).toBe("scheduled-check");
+
+    const evResult = getEvent(0);
+    const ev = cvToJSON(evResult.result).value.value;
+    expect(ev.active.value).toBe(false);
+    expect(ev.data.value).toBe("scheduled-check");
   });
 
   it("register, update, deactivate yields final consistent state", () => {
     registerEvent(BOB, "alert", "initial-reading");
     updateEvent(BOB, 0, "corrected-reading");
     deactivateEvent(BOB, 0);
-    const ev = getEvent(0);
-    expect(ev!.data).toBe("corrected-reading");
-    expect(ev!.active).toBe(false);
-    expect(ev!.owner).toBe(BOB);
+
+    const evResult = getEvent(0);
+    const ev = cvToJSON(evResult.result).value.value;
+    expect(ev.data.value).toBe("corrected-reading");
+    expect(ev.active.value).toBe(false);
+    expect(ev.owner.value).toBe(BOB);
   });
 });
 
@@ -130,18 +115,20 @@ describe("integration :: concurrent registrations", () => {
     const r1 = registerEvent(ALICE, "fire", "zone-1");
     const r2 = registerEvent(BOB, "flood", "zone-2");
     const r3 = registerEvent(CAROL, "gas-leak", "zone-3");
-    expect(r1).toEqual({ ok: 0 });
-    expect(r2).toEqual({ ok: 1 });
-    expect(r3).toEqual({ ok: 2 });
+
+    expect(cvToJSON(r1.result).value.value).toBe("0");
+    expect(cvToJSON(r2.result).value.value).toBe("1");
+    expect(cvToJSON(r3.result).value.value).toBe("2");
   });
 
   it("each registration preserves its own owner", () => {
     registerEvent(ALICE, "fire", "z1");
     registerEvent(BOB, "flood", "z2");
     registerEvent(CAROL, "gas-leak", "z3");
-    expect(getEvent(0)!.owner).toBe(ALICE);
-    expect(getEvent(1)!.owner).toBe(BOB);
-    expect(getEvent(2)!.owner).toBe(CAROL);
+
+    expect(cvToJSON(getEvent(0).result).value.value.owner.value).toBe(ALICE);
+    expect(cvToJSON(getEvent(1).result).value.value.owner.value).toBe(BOB);
+    expect(cvToJSON(getEvent(2).result).value.value.owner.value).toBe(CAROL);
   });
 
   it("counter reflects total after multiple registrations", () => {
@@ -150,16 +137,18 @@ describe("integration :: concurrent registrations", () => {
     registerEvent(CAROL, "c", "d");
     registerEvent(ALICE, "d", "d");
     registerEvent(BOB, "e", "d");
-    expect(counter).toBe(5);
+
+    expect(cvToJSON(getEventCount().result).value.value).toBe("5");
   });
 
   it("same user can register multiple events", () => {
     registerEvent(ALICE, "alert-1", "data-1");
     registerEvent(ALICE, "alert-2", "data-2");
     registerEvent(ALICE, "alert-3", "data-3");
-    expect(getEvent(0)!["event-type"]).toBe("alert-1");
-    expect(getEvent(1)!["event-type"]).toBe("alert-2");
-    expect(getEvent(2)!["event-type"]).toBe("alert-3");
+
+    expect(cvToJSON(getEvent(0).result).value.value["event-type"].value).toBe("alert-1");
+    expect(cvToJSON(getEvent(1).result).value.value["event-type"].value).toBe("alert-2");
+    expect(cvToJSON(getEvent(2).result).value.value["event-type"].value).toBe("alert-3");
   });
 });
 
@@ -170,42 +159,47 @@ describe("integration :: access control enforcement", () => {
     registerEvent(ALICE, "sensor", "temp-high");
     registerEvent(BOB, "sensor", "humidity-low");
 
-    expect(updateEvent(ALICE, 0, "temp-normal")).toEqual({ ok: true });
-    expect(updateEvent(ALICE, 1, "hijacked")).toEqual({ err: 403 });
-    expect(getEvent(1)!.data).toBe("humidity-low");
+    expect(cvToJSON(updateEvent(ALICE, 0, "temp-normal").result).value.value).toBe(true);
+    expect(cvToJSON(updateEvent(ALICE, 1, "hijacked").result).value.value).toBe("403");
+
+    expect(cvToJSON(getEvent(1).result).value.value.data.value).toBe("humidity-low");
   });
 
   it("owner can deactivate own event but not another user's", () => {
     registerEvent(ALICE, "alarm", "building-A");
     registerEvent(BOB, "alarm", "building-B");
 
-    expect(deactivateEvent(ALICE, 0)).toEqual({ ok: true });
-    expect(deactivateEvent(ALICE, 1)).toEqual({ err: 403 });
-    expect(getEvent(1)!.active).toBe(true);
+    expect(cvToJSON(deactivateEvent(ALICE, 0).result).value.value).toBe(true);
+    expect(cvToJSON(deactivateEvent(ALICE, 1).result).value.value).toBe("403");
+
+    expect(cvToJSON(getEvent(1).result).value.value.active.value).toBe(true);
   });
 
   it("deactivated event cannot be updated even by owner", () => {
     registerEvent(ALICE, "alert", "initial");
     deactivateEvent(ALICE, 0);
     const result = updateEvent(ALICE, 0, "try-update");
-    expect(result).toEqual({ err: 410 });
-    expect(getEvent(0)!.data).toBe("initial");
+    expect(cvToJSON(result.result).value.value).toBe("410");
+
+    expect(cvToJSON(getEvent(0).result).value.value.data.value).toBe("initial");
   });
 
   it("admin pause blocks all user operations uniformly", () => {
     registerEvent(ALICE, "alert", "data-1");
     registerEvent(BOB, "alert", "data-2");
-    pauseContract(DEPLOYER);
 
-    expect(registerEvent(CAROL, "new", "d")).toEqual({ err: 503 });
-    expect(updateEvent(ALICE, 0, "new")).toEqual({ err: 503 });
-    expect(deactivateEvent(BOB, 1)).toEqual({ err: 503 });
+    expect(cvToJSON(pauseContract(DEPLOYER).result).value.value).toBe(true);
+
+    expect(cvToJSON(registerEvent(CAROL, "new", "d").result).value.value).toBe("503");
+    expect(cvToJSON(updateEvent(ALICE, 0, "new").result).value.value).toBe("503");
+    expect(cvToJSON(deactivateEvent(BOB, 1).result).value.value).toBe("503");
   });
 
   it("non-admin cannot pause or unpause", () => {
-    expect(pauseContract(ALICE)).toEqual({ err: 403 });
-    pauseContract(DEPLOYER);
-    expect(unpauseContract(BOB)).toEqual({ err: 403 });
+    expect(cvToJSON(pauseContract(ALICE).result).value.value).toBe("403");
+
+    pauseContract(DEPLOYER); // Success
+    expect(cvToJSON(unpauseContract(BOB).result).value.value).toBe("403");
   });
 });
 
@@ -215,34 +209,38 @@ describe("integration :: event deactivation lifecycle", () => {
   it("deactivation preserves all fields except active flag", () => {
     registerEvent(ALICE, "equipment-failure", "pump-7-offline");
     deactivateEvent(ALICE, 0);
-    const ev = getEvent(0)!;
-    expect(ev.owner).toBe(ALICE);
-    expect(ev["event-type"]).toBe("equipment-failure");
-    expect(ev.data).toBe("pump-7-offline");
-    expect(ev.active).toBe(false);
+
+    const ev = cvToJSON(getEvent(0).result).value.value;
+    expect(ev.owner.value).toBe(ALICE);
+    expect(ev["event-type"].value).toBe("equipment-failure");
+    expect(ev.data.value).toBe("pump-7-offline");
+    expect(ev.active.value).toBe(false);
   });
 
   it("deactivation of one event does not affect others", () => {
     registerEvent(ALICE, "fire", "zone-1");
     registerEvent(ALICE, "flood", "zone-2");
     registerEvent(ALICE, "gas", "zone-3");
+
     deactivateEvent(ALICE, 1);
 
-    expect(getEvent(0)!.active).toBe(true);
-    expect(getEvent(1)!.active).toBe(false);
-    expect(getEvent(2)!.active).toBe(true);
+    expect(cvToJSON(getEvent(0).result).value.value.active.value).toBe(true);
+    expect(cvToJSON(getEvent(1).result).value.value.active.value).toBe(false);
+    expect(cvToJSON(getEvent(2).result).value.value.active.value).toBe(true);
   });
 
   it("cannot deactivate a nonexistent event", () => {
     const result = deactivateEvent(ALICE, 99);
-    expect(result).toEqual({ err: 404 });
+    expect(cvToJSON(result.result).value.value).toBe("404");
   });
 
   it("pause, unpause, then deactivate succeeds", () => {
     registerEvent(ALICE, "alert", "data");
+
     pauseContract(DEPLOYER);
-    expect(deactivateEvent(ALICE, 0)).toEqual({ err: 503 });
+    expect(cvToJSON(deactivateEvent(ALICE, 0).result).value.value).toBe("503");
+
     unpauseContract(DEPLOYER);
-    expect(deactivateEvent(ALICE, 0)).toEqual({ ok: true });
+    expect(cvToJSON(deactivateEvent(ALICE, 0).result).value.value).toBe(true);
   });
 });

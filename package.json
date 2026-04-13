@@ -29,10 +29,10 @@
     "@stacks/cli": "^7.2.0",
     "@stacks/network": "^7.3.1",
     "@stacks/transactions": "^7.4.0",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "@types/winston": "^2.4.4",
     "ts-node": "^10.9.2",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.4"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",

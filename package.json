@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
-    "@stacks/wallet-sdk": "^7.2.0",
+    "@stacks/wallet-sdk": "^7.4.0",
     "dotenv": "^17.2.3",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0"

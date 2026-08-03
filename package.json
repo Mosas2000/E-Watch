@@ -26,7 +26,7 @@
   "description": "",
   "devDependencies": {
     "@hirosystems/clarinet-sdk": "^3.8.1",
-    "@stacks/cli": "^7.5.0",
+    "@stacks/cli": "^7.6.0",
     "@stacks/network": "^7.3.1",
     "@stacks/transactions": "^7.4.0",
     "@types/node": "^25.9.3",
